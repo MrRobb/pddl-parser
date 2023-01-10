@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -56,3 +58,15 @@ pub struct And(Vec<Expression>);
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Not(Box<Expression>);
+
+impl Domain {
+	pub fn parse(pddl_domain: &str) -> Result<Self, Box<dyn Error>> {
+		let domain: Self = ron::from_str(pddl_domain)?;
+		Ok(domain)
+	}
+
+	pub fn to_string(&self) -> Result<String, Box<dyn Error>> {
+		ron::ser::to_string_pretty(self, ron::ser::PrettyConfig::default().struct_names(true))
+			.map_err(std::convert::Into::into)
+	}
+}
