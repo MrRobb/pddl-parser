@@ -1,0 +1,177 @@
+Domain(
+    // (domain letseat)
+    
+    name: "letseat",
+
+    // (:requirements :typing)
+
+    requirements: [
+        "typing"
+    ],
+
+    // (:types
+    //     location locatable - object
+    //     bot cupcake - locatable
+    //     robot - bot
+    // )
+
+    types: [
+        Type(name: "location", parent: "object"),
+        Type(name: "locatable", parent: "object"),
+        Type(name: "bot", parent: "locatable"),
+        Type(name: "cupcake", parent: "bot"),
+        Type(name: "robot", parent: "bot"),
+    ],
+
+    // (:predicates
+    //     (on ?obj - locatable ?loc - location)
+    //     (holding ?arm - locatable ?cupcake - locatable)
+    //     (arm-empty)
+    //     (path ?location1 - location ?location2 - location)
+    // )
+
+    predicates: [
+        Predicate(name: "on", parameters: [
+            Parameter(name: "obj", type: "locatable"),
+            Parameter(name: "loc", type: "location")
+        ]),
+        Predicate(name: "holding", parameters: [
+            Parameter(name: "arm", type: "locatable"),
+            Parameter(name: "cupcake", type: "locatable")
+        ]),
+        Predicate(name: "arm-empty"),
+        Predicate(name: "path", parameters: [
+            Parameter(name: "location1", type: "location"),
+            Parameter(name: "location2", type: "location")
+        ])
+    ],
+
+    // (:action pick-up
+    //     :parameters (?arm - bot ?cupcake - locatable ?loc - location)
+    //     :precondition (and
+    //         (on ?arm ?loc)
+    //         (on ?cupcake ?loc)
+    //         (arm-empty)
+    //     )
+    //     :effect (and
+    //         (not (on ?cupcake ?loc))
+    //         (holding ?arm ?cupcake)
+    //         (not (arm-empty))
+    //     )
+    // )
+    // 
+    // (:action drop
+    //     :parameters (?arm - bot ?cupcake - locatable ?loc - location)
+    //     :precondition (and
+    //         (on ?arm ?loc)
+    //         (holding ?arm ?cupcake)
+    //     )
+    //     :effect (and
+    //         (on ?cupcake ?loc)
+    //         (arm-empty)
+    //         (not (holding ?arm ?cupcake))
+    //     )
+    // )
+    // 
+    // (:action move
+    //     :parameters (?arm - bot ?from - location ?to - location)
+    //     :precondition (and
+    //         (on ?arm ?from)
+    //         (path ?from ?to)
+    //     )
+    //     :effect (and
+    //         (not (on ?arm ?from))
+    //         (on ?arm ?to)
+    //     )
+    // )
+
+    actions: [
+        Action(
+            name: "pick-up",
+            parameters: [
+                Parameter(name: "arm", type: "bot"),
+                Parameter(name: "cupcake", type: "locatable"),
+                Parameter(name: "loc", type: "location")
+            ],
+            precondition: And([
+                Predicate(name: "on", parameters: [
+                    Parameter(name: "arm"),
+                    Parameter(name: "loc")
+                ]),
+                Predicate(name: "on", parameters: [
+                    Parameter(name: "cupcake"),
+                    Parameter(name: "loc")
+                ]),
+                Predicate(name: "arm-empty")
+            ]),
+            effect: And([
+                Not(Predicate(name: "on", parameters: [
+                    Parameter(name: "cupcake"),
+                    Parameter(name: "loc")
+                ])),
+                Predicate(name: "holding", parameters: [
+                    Parameter(name: "arm"),
+                    Parameter(name: "cupcake")
+                ]),
+                Not(Predicate(name: "arm-empty"))
+            ])
+        ),
+        Action(
+            name: "drop",
+            parameters: [
+                Parameter(name: "arm", type: "bot"),
+                Parameter(name: "cupcake", type: "locatable"),
+                Parameter(name: "loc", type: "location")
+            ],
+            precondition: And([
+                Predicate(name: "on", parameters: [
+                    Parameter(name: "arm"),
+                    Parameter(name: "loc")
+                ]),
+                Predicate(name: "holding", parameters: [
+                    Parameter(name: "arm"),
+                    Parameter(name: "cupcake")
+                ])
+            ]),
+            effect: And([
+                Predicate(name: "on", parameters: [
+                    Parameter(name: "cupcake"),
+                    Parameter(name: "loc")
+                ]),
+                Predicate(name: "arm-empty"),
+                Not(Predicate(name: "holding", parameters: [
+                    Parameter(name: "arm"),
+                    Parameter(name: "cupcake")
+                ]))
+            ])
+        ),
+        Action(
+            name: "move",
+            parameters: [
+                Parameter(name: "arm", type: "bot"),
+                Parameter(name: "from", type: "location"),
+                Parameter(name: "to", type: "location")
+            ],
+            precondition: And([
+                Predicate(name: "on", parameters: [
+                    Parameter(name: "arm"),
+                    Parameter(name: "from")
+                ]),
+                Predicate(name: "path", parameters: [
+                    Parameter(name: "from"),
+                    Parameter(name: "to")
+                ])
+            ]),
+            effect: And([
+                Not(Predicate(name: "on", parameters: [
+                    Parameter(name: "arm"),
+                    Parameter(name: "from")
+                ])),
+                Predicate(name: "on", parameters: [
+                    Parameter(name: "arm"),
+                    Parameter(name: "to")
+                ])
+            ])
+        )
+    ]
+)
