@@ -1,11 +1,15 @@
-use pest::Parser;
-use pest_derive::Parser;
-
-#[derive(Parser)]
-#[grammar = "pddl.pest"]
-struct IdentParser;
+use nom::IResult;
 
 fn main() {
 	let domain_example = include_str!("../tests/domain.pddl");
-	let pairs = IdentParser::parse(Rule::domain, domain_example).unwrap_or_else(|e| panic!("{}", e));
+	assert_eq!(Domain::parse(domain_example), Ok(("", Domain {})));
+}
+
+#[derive(Debug, PartialEq)]
+struct Domain {}
+
+impl Domain {
+	fn parse(_input: &str) -> IResult<&str, Self> {
+		unimplemented!()
+	}
 }
