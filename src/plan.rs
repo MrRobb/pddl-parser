@@ -24,4 +24,8 @@ impl Plan {
 		ron::ser::to_string_pretty(self, ron::ser::PrettyConfig::default().struct_names(true))
 			.map_err(std::convert::Into::into)
 	}
+
+	pub fn actions(&self) -> impl Iterator<Item = &Action> {
+		self.0.iter()
+	}
 }
