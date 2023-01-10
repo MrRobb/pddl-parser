@@ -1,0 +1,9 @@
+// (pick-up arm cupcake table)
+// (move arm table plate)
+// (drop arm cupcake plate)
+
+Plan([
+    Action(name: "pick-up", parameters: ["arm", "cupcake", "table"]),
+    Action(name: "move", parameters: ["arm", "table", "plate"]),
+    Action(name: "drop", parameters: ["arm", "cupcake", "plate"])
+])
