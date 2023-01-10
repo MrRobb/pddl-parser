@@ -1,24 +1,3 @@
-// // problem.ron
-// Problem(
-//     name: "letseat-simple",
-//     domain: "letseat",
-//     objects: [
-//         Object(name: "arm", type: "robot"),
-//         Object(name: "cupcake", type: "cupcake"),
-//         Object(name: "table", type: "location"),
-//         Object(name: "plate", type: "location"),
-//     ],
-//     init: [
-//         Predicate(name: "on", args: ["arm", "table"]),
-//         Predicate(name: "on", args: ["cupcake", "table"]),
-//         Predicate(name: "arm-empty"),
-//         Predicate(name: "path", args: ["table", "plate"]),
-//     ],
-//     goal: [
-//         Predicate(name: "on", args: ["cupcake", "plate"]),
-//     ],
-// )
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
