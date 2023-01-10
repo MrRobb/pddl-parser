@@ -1,14 +1,4 @@
-use ron::ser::{to_string_pretty, PrettyConfig};
-
 use serde::{Deserialize, Serialize};
-
-fn main() {
-	let domain: Domain = ron::from_str(include_str!("../tests/domain.ron")).unwrap();
-	println!(
-		"{}",
-		to_string_pretty(&domain, PrettyConfig::new().struct_names(true)).unwrap()
-	);
-}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Domain {
