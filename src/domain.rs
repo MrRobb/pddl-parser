@@ -54,10 +54,10 @@ pub enum Expression {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct And(Vec<Expression>);
+pub struct And(pub Vec<Expression>);
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Not(Box<Expression>);
+pub struct Not(pub Box<Expression>);
 
 impl Domain {
 	pub fn parse(pddl_domain: &str) -> Result<Self, Box<dyn Error>> {
