@@ -2,7 +2,7 @@ use std::{error::Error, fmt::Display};
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Problem {
 	pub name: String,
 	pub domain: String,
@@ -14,14 +14,14 @@ pub struct Problem {
 	pub goal: Vec<Predicate>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Object {
 	pub name: String,
 	#[serde(rename = "type")]
 	pub type_: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Predicate {
 	pub name: String,
 	#[serde(default)]

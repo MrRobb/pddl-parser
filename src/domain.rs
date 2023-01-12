@@ -2,7 +2,7 @@ use std::error::Error;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Domain {
 	pub name: String,
 	pub requirements: Vec<String>,
@@ -11,20 +11,20 @@ pub struct Domain {
 	pub actions: Vec<Action>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Type {
 	pub name: String,
 	pub parent: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Predicate {
 	pub name: String,
 	#[serde(default)]
 	pub parameters: Vec<Parameter>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Action {
 	pub name: String,
 	#[serde(default)]
@@ -33,7 +33,7 @@ pub struct Action {
 	pub effect: Expression,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Parameter {
 	pub name: String,
 	#[serde(rename = "type")]
@@ -45,7 +45,7 @@ fn object() -> String {
 	"object".to_string()
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 #[serde(untagged)]
 pub enum Expression {
 	Predicate(Predicate),
@@ -53,10 +53,10 @@ pub enum Expression {
 	Not(Not),
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct And(Vec<Expression>);
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Not(Box<Expression>);
 
 impl Domain {
