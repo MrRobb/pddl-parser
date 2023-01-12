@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::{error::Error, fmt::Display};
 
 use serde::{Deserialize, Serialize};
 
@@ -13,6 +13,12 @@ pub struct Action {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Plan(Vec<Action>);
+
+impl Display for Action {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{}({})", self.name, self.parameters.join(", "))
+	}
+}
 
 impl Plan {
 	pub fn parse(pddl_domain: &str) -> Result<Self, Box<dyn Error>> {
