@@ -1,4 +1,4 @@
-#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::missing_errors_doc, clippy::must_use_candidate)]
 
 pub mod domain;
 pub mod plan;
