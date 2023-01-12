@@ -30,16 +30,7 @@ pub struct Predicate {
 
 impl Display for Predicate {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(
-			f,
-			"{}({})",
-			self.name,
-			self.args
-				.iter()
-				.map(std::string::ToString::to_string)
-				.collect::<Vec<String>>()
-				.join(", ")
-		)
+		write!(f, "{}({})", self.name, self.args.join(", "))
 	}
 }
 
