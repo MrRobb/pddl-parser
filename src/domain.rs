@@ -47,16 +47,14 @@ fn object() -> String {
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub enum Expression {
-	Predicate(Predicate),
-	And(And),
-	Not(Not),
+	Predicate {
+		name: String,
+		#[serde(default)]
+		parameters: Vec<Parameter>,
+	},
+	And(Vec<Expression>),
+	Not(Box<Expression>),
 }
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct And(pub Vec<Expression>);
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct Not(pub Box<Expression>);
 
 impl Domain {
 	pub fn parse(pddl_domain: &str) -> Result<Self, Box<dyn Error>> {
