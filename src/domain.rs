@@ -17,7 +17,7 @@ pub struct Type {
 	pub parent: String,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Predicate {
 	pub name: String,
 	#[serde(default)]
@@ -33,7 +33,7 @@ pub struct Action {
 	pub effect: Expression,
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Parameter {
 	pub name: String,
 	#[serde(rename = "type")]
@@ -45,8 +45,7 @@ fn object() -> String {
 	"object".to_string()
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
-#[serde(untagged)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
 pub enum Expression {
 	Predicate(Predicate),
 	And(And),
