@@ -103,7 +103,7 @@ impl Domain {
     fn parse_requirements(input: &str) -> IResult<&str, Vec<String>> {
         let (output, requirements) = delimited(
             char('('),
-            preceded(ws(tag(":requirements")), ws(many0(preceded(char(':'), id)))),
+            preceded(ws(tag(":requirements")), many0(ws(preceded(char(':'), id)))),
             char(')'),
         )(input)
         .unwrap();
