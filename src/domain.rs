@@ -122,13 +122,12 @@ impl Domain {
         .unwrap();
         let types = types
             .into_iter()
-            .map(|(names, parent)| {
+            .flat_map(|(names, parent)| {
                 names.into_iter().map(move |name| Type {
                     name,
                     parent: parent.clone(),
                 })
             })
-            .flatten()
             .collect();
         Ok((output, types))
     }
@@ -158,13 +157,12 @@ impl Domain {
         let (output, params) = many0(separated_pair(many1(ws(var)), opt(char('-')), opt(ws(id))))(input).unwrap();
         let params = params
             .into_iter()
-            .map(|(names, type_)| {
+            .flat_map(|(names, type_)| {
                 names.into_iter().map(move |name| Parameter {
                     name,
                     type_: type_.clone().unwrap_or_else(object),
                 })
             })
-            .flatten()
             .collect();
         Ok((output, params))
     }
