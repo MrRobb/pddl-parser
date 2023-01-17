@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-nom = "7.1.2"
-serde = { version = "1.0.152", features = ["derive"] }
+nom = "7.1"
+serde = { version = "1.0", features = ["derive"] }
 
 [dev-dependencies]
 criterion = "0.4"
