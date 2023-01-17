@@ -1,0 +1,48 @@
+name: Rust
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Setup toolchain
+      - name: Setup toolchain nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          components: rustfmt
+          profile: minimal
+
+      - name: Setup toolchain stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy
+          profile: minimal
+
+      # Cache
+      - uses: actions/cache@v3
+        with:
+          key: rs-${{ runner.os }}-${{ steps.rust-toolchain.outputs.rustc_hash }}-${{ hashFiles('**/Cargo.*') }}-build
+          restore-keys: |
+            rs-${{ runner.os }}-${{ steps.rust-toolchain.outputs.rustc_hash }}-${{ hashFiles('**/Cargo.*') }}-
+            rs-${{ runner.os }}-${{ steps.rust-toolchain.outputs.rustc_hash }}-
+          path: ~/.cargo
+
+      # Checks
+      - run: cargo +nightly fmt -- --check
+      - run: cargo clippy -- --deny warnings
+      - run: cargo test
+      - run: cargo build --all-features --all-targets --release
