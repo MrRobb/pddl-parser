@@ -1,6 +1,7 @@
+use std::fs::read_to_string;
+
 use criterion::{criterion_group, criterion_main, Criterion};
 use pddl_parser::domain::Domain;
-use std::fs::read_to_string;
 
 fn bench(c: &mut Criterion) {
     let domain_file = read_to_string("tests/domain.pddl").unwrap();
