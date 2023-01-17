@@ -1,0 +1,249 @@
+use nom::branch::alt;
+use nom::bytes::complete::tag;
+use nom::character::complete::char;
+use nom::combinator::{map, opt};
+use nom::multi::{many0, many1};
+use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
+use nom::IResult;
+use serde::{Deserialize, Serialize};
+
+use crate::tokens::{id, var, ws};
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+pub struct Type {
+    pub name: String,
+    pub parent: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+pub struct Predicate {
+    pub name: String,
+    #[serde(default)]
+    pub parameters: Vec<Parameter>,
+}
+
+fn object() -> String {
+    "object".to_string()
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+pub struct Parameter {
+    pub name: String,
+    #[serde(rename = "type")]
+    #[serde(default = "object")]
+    pub type_: String,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+pub enum Expression {
+    Predicate {
+        name: String,
+        #[serde(default)]
+        parameters: Vec<Parameter>,
+    },
+    And(Vec<Expression>),
+    Not(Box<Expression>),
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+pub struct Action {
+    pub name: String,
+    #[serde(default)]
+    pub parameters: Vec<Parameter>,
+    pub precondition: Expression,
+    pub effect: Expression,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+pub struct Domain {
+    pub name: String,
+    pub requirements: Vec<String>,
+    pub types: Vec<Type>,
+    pub predicates: Vec<Predicate>,
+    pub actions: Vec<Action>,
+}
+
+impl Domain {
+    pub fn parse(input: &str) -> IResult<&str, Self> {
+        let (output, domain) = delimited(
+            char('('),
+            preceded(ws(tag("define")), ws(Domain::parse_domain)),
+            char(')'),
+        )(input)
+        .unwrap();
+        Ok((output, domain))
+    }
+
+    fn parse_domain(input: &str) -> IResult<&str, Domain> {
+        let (output, (name, requirements, types, predicates, actions)) = tuple((
+            ws(Domain::parse_name),
+            ws(Domain::parse_requirements),
+            ws(Domain::parse_types),
+            ws(Domain::parse_predicates),
+            ws(Domain::parse_actions),
+        ))(input)
+        .unwrap();
+        Ok((
+            output,
+            Domain {
+                name,
+                requirements,
+                types,
+                predicates,
+                actions,
+            },
+        ))
+    }
+
+    fn parse_name(input: &str) -> IResult<&str, String> {
+        let (output, name) = delimited(char('('), preceded(ws(tag("domain")), ws(id)), char(')'))(input).unwrap();
+        Ok((output, name))
+    }
+
+    fn parse_requirements(input: &str) -> IResult<&str, Vec<String>> {
+        let (output, requirements) = delimited(
+            char('('),
+            preceded(ws(tag(":requirements")), ws(many0(preceded(char(':'), id)))),
+            char(')'),
+        )(input)
+        .unwrap();
+        Ok((output, requirements))
+    }
+
+    fn parse_types(input: &str) -> IResult<&str, Vec<Type>> {
+        let (output, types) = delimited(
+            char('('),
+            preceded(
+                ws(tag(":types")),
+                ws(many0(separated_pair(many0(ws(id)), char('-'), ws(id)))),
+            ),
+            char(')'),
+        )(input)
+        .unwrap();
+        let types = types
+            .into_iter()
+            .map(|(names, parent)| {
+                names.into_iter().map(move |name| Type {
+                    name,
+                    parent: parent.clone(),
+                })
+            })
+            .flatten()
+            .collect();
+        Ok((output, types))
+    }
+
+    fn parse_predicates(input: &str) -> IResult<&str, Vec<Predicate>> {
+        let (output, predicates) = delimited(
+            char('('),
+            preceded(
+                ws(tag(":predicates")),
+                many0(ws(delimited(
+                    char('('),
+                    pair(ws(id), Domain::parse_parameters),
+                    char(')'),
+                ))),
+            ),
+            char(')'),
+        )(input)
+        .unwrap();
+        let predicates = predicates
+            .into_iter()
+            .map(|(name, parameters)| Predicate { name, parameters })
+            .collect();
+        Ok((output, predicates))
+    }
+
+    fn parse_parameters(input: &str) -> IResult<&str, Vec<Parameter>> {
+        println!("parse_parameters BEGIN: {}", input);
+        let (output, params) = many0(separated_pair(many1(ws(var)), opt(char('-')), opt(ws(id))))(input).unwrap();
+        let params = params
+            .into_iter()
+            .map(|(names, type_)| {
+                names.into_iter().map(move |name| Parameter {
+                    name,
+                    type_: type_.clone().unwrap_or_else(object),
+                })
+            })
+            .flatten()
+            .collect();
+        println!("parse_parameters END: {}", input);
+        Ok((output, params))
+    }
+
+    fn parse_actions(input: &str) -> IResult<&str, Vec<Action>> {
+        println!("parse_actions: {}", input);
+        let (output, actions) = many0(ws(delimited(
+            char('('),
+            preceded(
+                ws(tag(":action")),
+                tuple((
+                    ws(id),
+                    ws(preceded(
+                        tag(":parameters"),
+                        ws(delimited(char('('), ws(Domain::parse_parameters), char(')'))),
+                    )),
+                    ws(preceded(tag(":precondition"), ws(Domain::parse_expression))),
+                    ws(preceded(tag(":effect"), ws(Domain::parse_expression))),
+                )),
+            ),
+            char(')'),
+        )))(input)
+        .unwrap();
+        let actions = actions
+            .into_iter()
+            .map(|(name, parameters, precondition, effect)| Action {
+                name,
+                parameters,
+                precondition,
+                effect,
+            })
+            .collect();
+        Ok((output, actions))
+    }
+
+    fn parse_expression(input: &str) -> IResult<&str, Expression> {
+        println!("parse_expression: {}", input);
+        let (output, expression) = alt((Self::parse_and, Self::parse_not, Self::parse_pred))(input)?;
+        Ok((output, expression))
+    }
+
+    fn parse_and(input: &str) -> IResult<&str, Expression> {
+        println!("parse_and: {}", input);
+        let (output, expressions) = map(
+            ws(delimited(
+                char('('),
+                preceded(ws(tag("and")), many0(ws(Domain::parse_expression))),
+                char(')'),
+            )),
+            Expression::And,
+        )(input)?;
+        Ok((output, expressions))
+    }
+
+    fn parse_not(input: &str) -> IResult<&str, Expression> {
+        println!("parse_not: {}", input);
+        let (output, expressions) = map(
+            ws(delimited(
+                char('('),
+                preceded(ws(tag("not")), ws(Domain::parse_expression)),
+                char(')'),
+            )),
+            |e| Expression::Not(Box::new(e)),
+        )(input)?;
+        Ok((output, expressions))
+    }
+
+    fn parse_pred(input: &str) -> IResult<&str, Expression> {
+        println!("parse_pred: {}", input);
+        let (output, expressions) = map(
+            ws(delimited(
+                char('('),
+                pair(ws(id), ws(Self::parse_parameters)),
+                char(')'),
+            )),
+            |(name, parameters)| Expression::Predicate { name, parameters },
+        )(input)?;
+        Ok((output, expressions))
+    }
+}
