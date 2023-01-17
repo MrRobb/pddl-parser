@@ -64,14 +64,14 @@ pub struct Domain {
 }
 
 impl Domain {
-    pub fn parse(input: &str) -> IResult<&str, Self> {
-        let (output, domain) = delimited(
+    pub fn parse(input: &str) -> Self {
+        let (_, domain) = delimited(
             char('('),
             preceded(ws(tag("define")), ws(Domain::parse_domain)),
             char(')'),
         )(input)
         .unwrap();
-        Ok((output, domain))
+        domain
     }
 
     fn parse_domain(input: &str) -> IResult<&str, Domain> {
