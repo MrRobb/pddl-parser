@@ -20,7 +20,6 @@ pub struct Action {
 
 impl Action {
     fn parse(input: &str) -> IResult<&str, Self> {
-        println!("parse: {}", input);
         let (output, (name, parameters)) = delimited(
             char('('),
             separated_pair(Action::parse_name, space1, Action::parse_parameters),
@@ -30,13 +29,11 @@ impl Action {
     }
 
     fn parse_name(input: &str) -> IResult<&str, String> {
-        println!("parse_name: {}", input);
         let (output, name) = parse_id(input)?;
         Ok((output, name))
     }
 
     fn parse_parameters(input: &str) -> IResult<&str, Vec<Parameter>> {
-        println!("parse_parameters: {}", input);
         let (output, parameters) = separated_list0(space1, map(alphanumeric0, String::from))(input)?;
         Ok((output, parameters))
     }

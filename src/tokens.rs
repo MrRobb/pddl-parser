@@ -9,13 +9,10 @@ use nom::sequence::{delimited, pair, preceded};
 use nom::IResult;
 
 pub fn parse_id(input: &str) -> IResult<&str, String> {
-    println!("parse_id: {}", input);
     let (output, id) = map(take_while(|c: char| is_alphanumeric(c as u8) || c == '-'), String::from)(input)?;
     Ok((output, id))
 }
 
-/// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and
-/// trailing whitespace, returning the output of `inner`.
 pub fn ws<'a, F, O, E: ParseError<&'a str>>(inner: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
 where
     F: FnMut(&'a str) -> IResult<&'a str, O, E>,

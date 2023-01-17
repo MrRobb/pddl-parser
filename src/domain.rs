@@ -155,7 +155,6 @@ impl Domain {
     }
 
     fn parse_parameters(input: &str) -> IResult<&str, Vec<Parameter>> {
-        println!("parse_parameters BEGIN: {}", input);
         let (output, params) = many0(separated_pair(many1(ws(var)), opt(char('-')), opt(ws(id))))(input).unwrap();
         let params = params
             .into_iter()
@@ -167,12 +166,10 @@ impl Domain {
             })
             .flatten()
             .collect();
-        println!("parse_parameters END: {}", input);
         Ok((output, params))
     }
 
     fn parse_actions(input: &str) -> IResult<&str, Vec<Action>> {
-        println!("parse_actions: {}", input);
         let (output, actions) = many0(ws(delimited(
             char('('),
             preceded(
@@ -203,13 +200,11 @@ impl Domain {
     }
 
     fn parse_expression(input: &str) -> IResult<&str, Expression> {
-        println!("parse_expression: {}", input);
         let (output, expression) = alt((Self::parse_and, Self::parse_not, Self::parse_pred))(input)?;
         Ok((output, expression))
     }
 
     fn parse_and(input: &str) -> IResult<&str, Expression> {
-        println!("parse_and: {}", input);
         let (output, expressions) = map(
             ws(delimited(
                 char('('),
@@ -222,7 +217,6 @@ impl Domain {
     }
 
     fn parse_not(input: &str) -> IResult<&str, Expression> {
-        println!("parse_not: {}", input);
         let (output, expressions) = map(
             ws(delimited(
                 char('('),
@@ -235,7 +229,6 @@ impl Domain {
     }
 
     fn parse_pred(input: &str) -> IResult<&str, Expression> {
-        println!("parse_pred: {}", input);
         let (output, expressions) = map(
             ws(delimited(
                 char('('),
