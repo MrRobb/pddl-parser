@@ -3,7 +3,7 @@
     (:requirements :typing)
 
     (:types
-        location locatable - object
+        location locatable - object ; comment
         bot cupcake - locatable
         robot - bot
     )
