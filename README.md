@@ -22,6 +22,24 @@ fn main() {
 }
 ```
 
+## PDDL Requirements supported
+
+- [x] :strips
+- [x] :typing
+- [ ] :equality
+- [ ] :fluents
+- [ ] :adl
+- [ ] :durative-actions
+- [ ] :derived-predicates
+- [ ] :numeric-fluents
+- [ ] :preferences
+- [ ] :constraints
+- [ ] :action-costs
+- [ ] :conditional-effects
+- [ ] :probabilistic-effects
+- [ ] :reward-effects
+
+
 ## Contributing
 
 ### TODO
@@ -32,7 +50,7 @@ fn main() {
   - [x] Support PDDL plan parsing
 
 - [ ] PDDL Features
-  - [ ] Better support for types
+  - [ ] Better support for types (assign types to variables, etc.)
 
 - [ ] Testing:
   - [ ] Add tests for all PDDL files in [pddl-instances](https://github.com/potassco/pddl-instances)
