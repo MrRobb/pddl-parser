@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{error::Error, fmt::Display};
 
 use nom::character::complete::{alphanumeric0, char, line_ending, space1};
 use nom::combinator::map;
@@ -49,9 +49,10 @@ impl Display for Action {
 pub struct Plan(pub Vec<Action>);
 
 impl Plan {
-    pub fn parse(input: &str) -> IResult<&str, Self> {
-        let (output, plan) = many0(terminated(Action::parse, line_ending))(input)?;
-        Ok((output, Plan(plan)))
+    pub fn parse(input: &str) -> Result<Self, Box<dyn Error>> {
+        let (_, plan) =
+            many0(terminated(Action::parse, line_ending))(input).map_err(|e| format!("Failed to parse plan: {e}"))?;
+        Ok(Plan(plan))
     }
 
     pub fn actions(&self) -> impl Iterator<Item = &Action> {
