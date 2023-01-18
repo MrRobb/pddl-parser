@@ -50,7 +50,7 @@ pub struct Plan(pub Vec<Action>);
 
 impl Plan {
     pub fn parse(input: &str) -> IResult<&str, Self> {
-        let (output, plan) = many0(terminated(Action::parse, line_ending))(input).unwrap();
+        let (output, plan) = many0(terminated(Action::parse, line_ending))(input)?;
         Ok((output, Plan(plan)))
     }
 

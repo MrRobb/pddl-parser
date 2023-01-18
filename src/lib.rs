@@ -1,3 +1,5 @@
+#![allow(clippy::missing_errors_doc, clippy::use_self)]
+
 pub mod domain;
 pub mod plan;
 pub mod tokens;
@@ -33,10 +35,11 @@ mod tests {
     }
 
     #[test]
+    #[allow(clippy::too_many_lines)]
     fn test_domain() {
         let domain_example = include_str!("../tests/domain.pddl");
         assert_eq!(
-            domain::Domain::parse(domain_example),
+            domain::Domain::parse(domain_example).unwrap(),
             domain::Domain {
                 name: "letseat".to_string(),
                 requirements: vec!["typing".to_string(),],
@@ -341,6 +344,6 @@ mod tests {
                     }
                 ],
             }
-        )
+        );
     }
 }

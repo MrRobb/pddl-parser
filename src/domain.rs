@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::char;
@@ -64,14 +66,14 @@ pub struct Domain {
 }
 
 impl Domain {
-    pub fn parse(input: &str) -> Self {
+    pub fn parse(input: &str) -> Result<Self, Box<dyn Error>> {
         let (_, domain) = delimited(
             char('('),
             preceded(ws(tag("define")), ws(Domain::parse_domain)),
             char(')'),
         )(input)
-        .unwrap();
-        domain
+        .map_err(|e| format!("Failed to parse domain: {e}"))?;
+        Ok(domain)
     }
 
     fn parse_domain(input: &str) -> IResult<&str, Domain> {
@@ -81,8 +83,7 @@ impl Domain {
             ws(Domain::parse_types),
             ws(Domain::parse_predicates),
             ws(Domain::parse_actions),
-        ))(input)
-        .unwrap();
+        ))(input)?;
         Ok((
             output,
             Domain {
@@ -96,7 +97,7 @@ impl Domain {
     }
 
     fn parse_name(input: &str) -> IResult<&str, String> {
-        let (output, name) = delimited(char('('), preceded(ws(tag("domain")), ws(id)), char(')'))(input).unwrap();
+        let (output, name) = delimited(char('('), preceded(ws(tag("domain")), ws(id)), char(')'))(input)?;
         Ok((output, name))
     }
 
@@ -105,8 +106,7 @@ impl Domain {
             char('('),
             preceded(ws(tag(":requirements")), many0(ws(preceded(char(':'), id)))),
             char(')'),
-        )(input)
-        .unwrap();
+        )(input)?;
         Ok((output, requirements))
     }
 
@@ -118,8 +118,7 @@ impl Domain {
                 ws(many0(separated_pair(many0(ws(id)), char('-'), ws(id)))),
             ),
             char(')'),
-        )(input)
-        .unwrap();
+        )(input)?;
         let types = types
             .into_iter()
             .flat_map(|(names, parent)| {
@@ -144,8 +143,7 @@ impl Domain {
                 ))),
             ),
             char(')'),
-        )(input)
-        .unwrap();
+        )(input)?;
         let predicates = predicates
             .into_iter()
             .map(|(name, parameters)| Predicate { name, parameters })
@@ -154,7 +152,7 @@ impl Domain {
     }
 
     fn parse_parameters(input: &str) -> IResult<&str, Vec<Parameter>> {
-        let (output, params) = many0(separated_pair(many1(ws(var)), opt(char('-')), opt(ws(id))))(input).unwrap();
+        let (output, params) = many0(separated_pair(many1(ws(var)), opt(char('-')), opt(ws(id))))(input)?;
         let params = params
             .into_iter()
             .flat_map(|(names, type_)| {
@@ -183,8 +181,7 @@ impl Domain {
                 )),
             ),
             char(')'),
-        )))(input)
-        .unwrap();
+        )))(input)?;
         let actions = actions
             .into_iter()
             .map(|(name, parameters, precondition, effect)| Action {
