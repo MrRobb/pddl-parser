@@ -80,7 +80,7 @@ impl Domain {
         let (output, (name, requirements, types, predicates, actions)) = tuple((
             ws(Domain::parse_name),
             ws(Domain::parse_requirements),
-            ws(Domain::parse_types),
+            ws(opt(Domain::parse_types)),
             ws(Domain::parse_predicates),
             ws(Domain::parse_actions),
         ))(input)?;
@@ -89,7 +89,7 @@ impl Domain {
             Domain {
                 name,
                 requirements,
-                types,
+                types: types.unwrap_or_default(),
                 predicates,
                 actions,
             },
