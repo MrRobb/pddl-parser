@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::char;
@@ -9,7 +7,65 @@ use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
-use crate::tokens::{id, var, ws};
+use crate::{
+    error::ParserError,
+    tokens::{id, var, ws},
+};
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+pub enum Requirement {
+    Strips,
+    Typing,
+    NegativePreconditions,
+    DisjunctivePreconditions,
+    Equality,
+    ExistentialPreconditions,
+    UniversalPreconditions,
+    QuantifiedPreconditions,
+    ConditionalEffects,
+    FluentActions,
+    Adl,
+    DurativeActions,
+    DurativeAtEnd,
+    ContinuousEffects,
+    DerivedPredicates,
+    TimedInitialLiterals,
+    Preferences,
+    Constraints,
+    ActionCosts,
+}
+
+impl Requirement {
+    fn parse_requirement(input: &str) -> IResult<&str, Requirement> {
+        alt((
+            map(tag(":strips"), |_| Requirement::Strips),
+            map(tag(":typing"), |_| Requirement::Typing),
+            map(tag(":negative-preconditions"), |_| Requirement::NegativePreconditions),
+            map(tag(":disjunctive-preconditions"), |_| {
+                Requirement::DisjunctivePreconditions
+            }),
+            map(tag(":equality"), |_| Requirement::Equality),
+            map(tag(":existential-preconditions"), |_| {
+                Requirement::ExistentialPreconditions
+            }),
+            map(tag(":universal-preconditions"), |_| Requirement::UniversalPreconditions),
+            map(tag(":quantified-preconditions"), |_| {
+                Requirement::QuantifiedPreconditions
+            }),
+            map(tag(":conditional-effects"), |_| Requirement::ConditionalEffects),
+            map(tag(":fluent-actions"), |_| Requirement::FluentActions),
+            map(tag(":adl"), |_| Requirement::Adl),
+            map(tag(":durative-actions"), |_| Requirement::DurativeActions),
+            map(tag(":durative-at-end"), |_| Requirement::DurativeAtEnd),
+            map(tag(":continuous-effects"), |_| Requirement::ContinuousEffects),
+            map(tag(":derived-predicates"), |_| Requirement::DerivedPredicates),
+            map(tag(":timed-initial-literals"), |_| Requirement::TimedInitialLiterals),
+            map(tag(":preferences"), |_| Requirement::Preferences),
+            map(tag(":constraints"), |_| Requirement::Constraints),
+            map(tag(":action-costs"), |_| Requirement::ActionCosts),
+        ))(input)
+    }
+}
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Type {
@@ -59,20 +115,19 @@ pub struct Action {
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Domain {
     pub name: String,
-    pub requirements: Vec<String>,
+    pub requirements: Vec<Requirement>,
     pub types: Vec<Type>,
     pub predicates: Vec<Predicate>,
     pub actions: Vec<Action>,
 }
 
 impl Domain {
-    pub fn parse(input: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn parse(input: &str) -> Result<Self, ParserError> {
         let (_, domain) = delimited(
             char('('),
             preceded(ws(tag("define")), ws(Domain::parse_domain)),
             char(')'),
-        )(input)
-        .map_err(|e| format!("Failed to parse domain: {e}"))?;
+        )(input)?;
         Ok(domain)
     }
 
@@ -101,10 +156,10 @@ impl Domain {
         Ok((output, name))
     }
 
-    fn parse_requirements(input: &str) -> IResult<&str, Vec<String>> {
+    fn parse_requirements(input: &str) -> IResult<&str, Vec<Requirement>> {
         let (output, requirements) = delimited(
             char('('),
-            preceded(ws(tag(":requirements")), many0(ws(preceded(char(':'), id)))),
+            preceded(ws(tag(":requirements")), many0(ws(Requirement::parse_requirement))),
             char(')'),
         )(input)?;
         Ok((output, requirements))
