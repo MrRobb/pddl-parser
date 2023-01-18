@@ -7,10 +7,8 @@ use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    error::ParserError,
-    tokens::{id, var, ws},
-};
+use crate::error::ParserError;
+use crate::tokens::{id, var, ws};
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub enum Requirement {

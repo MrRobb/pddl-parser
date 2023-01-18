@@ -1,17 +1,14 @@
 #[cfg(test)]
 mod tests {
-    use std::{
-        cell::RefCell,
-        path::{Path, PathBuf},
-    };
+    use std::cell::RefCell;
+    use std::path::{Path, PathBuf};
 
     use cached::proc_macro::cached;
-    use git2::{
-        build::{CheckoutBuilder, RepoBuilder},
-        FetchOptions, RemoteCallbacks,
-    };
+    use git2::build::{CheckoutBuilder, RepoBuilder};
+    use git2::{FetchOptions, RemoteCallbacks};
     use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
-    use pddl_parser::{domain::Domain, error::ParserError};
+    use pddl_parser::domain::Domain;
+    use pddl_parser::error::ParserError;
     use url::Url;
 
     fn clone(repo: &Url, path: &Path) {
@@ -60,7 +57,8 @@ mod tests {
         let domain_file = folder.join("domain.pddl");
         if domain_file.exists() {
             vec![domain_file]
-        } else {
+        }
+        else {
             let folder = folder.join("domains");
             let domains = (1..)
                 .map(|i| folder.join(format!("domain-{}.pddl", i)))

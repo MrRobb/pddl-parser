@@ -1,15 +1,12 @@
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_while};
-use nom::character::complete::{alpha1, alphanumeric1, char, multispace0, not_line_ending};
-use nom::combinator::{map, recognize};
+use nom::character::complete::{alpha1, alphanumeric1, char, line_ending, multispace0, not_line_ending};
+use nom::character::is_alphanumeric;
+use nom::combinator::{map, opt, recognize};
 use nom::error::ParseError;
 use nom::multi::many0_count;
 use nom::sequence::{delimited, pair, preceded};
 use nom::IResult;
-use nom::{
-    character::{complete::line_ending, is_alphanumeric},
-    combinator::opt,
-};
 
 pub fn parse_id(input: &str) -> IResult<&str, String> {
     let (output, id) = map(take_while(|c: char| is_alphanumeric(c as u8) || c == '-'), String::from)(input)?;
