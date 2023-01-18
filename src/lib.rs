@@ -1,13 +1,14 @@
 #![allow(clippy::missing_errors_doc, clippy::use_self)]
 
 pub mod domain;
+pub mod error;
 pub mod plan;
 pub mod problem;
 pub mod tokens;
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::{self, Expression, Parameter, Type};
+    use crate::domain::{self, Expression, Parameter, Requirement, Type};
     use crate::plan::{Action, Plan};
     use crate::problem::{Object, Predicate, Problem};
 
@@ -93,7 +94,7 @@ mod tests {
             domain::Domain::parse(domain_example).unwrap(),
             domain::Domain {
                 name: "letseat".to_string(),
-                requirements: vec!["typing".to_string(),],
+                requirements: vec![Requirement::Typing],
                 types: vec![
                     Type {
                         name: "location".to_string(),
