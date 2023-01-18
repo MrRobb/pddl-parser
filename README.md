@@ -37,6 +37,7 @@ fn main() {
 - [ ] Error handling:
   - [ ] Custom errors (using [thiserror](https://crates.io/crates/thiserror))
   - [ ] Forbid unwrap
+  - [ ] Check that all of the input has been consumed
 
 - [ ] Documentation:
   - [ ] Add documentation for all public items
