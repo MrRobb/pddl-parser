@@ -7,14 +7,9 @@ pub mod tokens;
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        domain::{self, Expression, Parameter, Type},
-        problem::Problem,
-    };
-    use crate::{
-        plan::{Action, Plan},
-        problem::{Object, Predicate},
-    };
+    use crate::domain::{self, Expression, Parameter, Type};
+    use crate::plan::{Action, Plan};
+    use crate::problem::{Object, Predicate, Problem};
 
     #[test]
     fn test_plan() {

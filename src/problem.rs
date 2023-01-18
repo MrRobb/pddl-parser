@@ -1,15 +1,10 @@
 use std::error::Error;
 
-use nom::{
-    bytes::complete::tag,
-    character::complete::char,
-    sequence::{pair, tuple},
-    IResult,
-};
-use nom::{
-    multi::many0,
-    sequence::{delimited, preceded, separated_pair},
-};
+use nom::bytes::complete::tag;
+use nom::character::complete::char;
+use nom::multi::many0;
+use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
+use nom::IResult;
 use serde::{Deserialize, Serialize};
 
 use crate::tokens::{id, ws};
