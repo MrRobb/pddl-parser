@@ -2,12 +2,19 @@
 
 pub mod domain;
 pub mod plan;
+pub mod problem;
 pub mod tokens;
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::{self, Expression, Parameter, Type};
-    use crate::plan::{Action, Plan};
+    use crate::{
+        domain::{self, Expression, Parameter, Type},
+        problem::Problem,
+    };
+    use crate::{
+        plan::{Action, Plan},
+        problem::{Object, Predicate},
+    };
 
     #[test]
     fn test_plan() {
@@ -28,6 +35,58 @@ mod tests {
                     parameters: vec!["arm".to_string(), "cupcake".to_string(), "plate".to_string()]
                 },
             ])
+        );
+    }
+
+    #[test]
+    fn test_problem() {
+        let problem_example = include_str!("../tests/problem.pddl");
+        assert_eq!(
+            Problem::parse(problem_example).unwrap(),
+            Problem {
+                name: "letseat-simple".to_string(),
+                domain: "letseat".to_string(),
+                objects: vec![
+                    Object {
+                        name: "arm".to_string(),
+                        type_: "robot".to_string(),
+                    },
+                    Object {
+                        name: "cupcake".to_string(),
+                        type_: "cupcake".to_string(),
+                    },
+                    Object {
+                        name: "table".to_string(),
+                        type_: "location".to_string(),
+                    },
+                    Object {
+                        name: "plate".to_string(),
+                        type_: "location".to_string(),
+                    },
+                ],
+                init: vec![
+                    Predicate {
+                        name: "on".to_string(),
+                        args: vec!["arm".to_string(), "table".to_string(),],
+                    },
+                    Predicate {
+                        name: "on".to_string(),
+                        args: vec!["cupcake".to_string(), "table".to_string(),],
+                    },
+                    Predicate {
+                        name: "arm-empty".to_string(),
+                        args: vec![],
+                    },
+                    Predicate {
+                        name: "path".to_string(),
+                        args: vec!["table".to_string(), "plate".to_string(),],
+                    }
+                ],
+                goal: vec![Predicate {
+                    name: "on".to_string(),
+                    args: vec!["cupcake".to_string(), "plate".to_string(),],
+                },]
+            }
         );
     }
 
