@@ -26,10 +26,13 @@ fn main() {
 
 ### TODO
 
-- [ ] Parsing:
+- [x] Parsing:
   - [x] Support PDDL domain parsing
-  - [ ] Support PDDL problem parsing
+  - [x] Support PDDL problem parsing
   - [x] Support PDDL plan parsing
+
+- [ ] PDDL Features
+  - [ ] Better support for types
 
 - [ ] Testing:
   - [ ] Add tests for all PDDL files in [pddl-instances](https://github.com/potassco/pddl-instances)
