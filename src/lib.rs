@@ -1,4 +1,4 @@
-#![allow(clippy::missing_errors_doc, clippy::use_self)]
+#![allow(clippy::missing_errors_doc, clippy::use_self, clippy::module_name_repetitions)]
 
 pub mod domain;
 pub mod error;
