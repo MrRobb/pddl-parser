@@ -12,33 +12,54 @@ use crate::tokens::{id, var, ws};
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub enum Requirement {
+    // PDDL 1
     Strips,
     Typing,
-    NegativePreconditions,
     DisjunctivePreconditions,
     Equality,
     ExistentialPreconditions,
     UniversalPreconditions,
     QuantifiedPreconditions,
     ConditionalEffects,
-    FluentActions,
+    ActionExpansions,
+    ForeachExpansions,
+    DagExpansions,
+    DomainAxioms,
+    SubgoalsThroughAxioms,
+    SafetyConstraints,
+    ExpressionEvaluation,
+    Fluents,
+    OpenWorld,
+    TrueNegation,
     Adl,
+    Ucpop,
+
+    // PDDL 2.1
+    NumericFluents,
     DurativeActions,
-    DurativeAtEnd,
+    DurativeInequalities,
     ContinuousEffects,
+    NegativePreconditions,
+
+    // PDDL 2.2
     DerivedPredicates,
     TimedInitialLiterals,
+
+    // PDDL 3
     Preferences,
     Constraints,
-    ActionCosts,
+
+    // PDDL+
+    Time,
 }
 
 impl Requirement {
-    fn parse_requirement(input: &str) -> IResult<&str, Requirement> {
+    fn parse_requirement(input: &str) -> IResult<&str, Requirement, ParserError> {
+        alt((
+            // PDDL 1
         alt((
             map(tag(":strips"), |_| Requirement::Strips),
             map(tag(":typing"), |_| Requirement::Typing),
-            map(tag(":negative-preconditions"), |_| Requirement::NegativePreconditions),
             map(tag(":disjunctive-preconditions"), |_| {
                 Requirement::DisjunctivePreconditions
             }),
@@ -51,16 +72,39 @@ impl Requirement {
                 Requirement::QuantifiedPreconditions
             }),
             map(tag(":conditional-effects"), |_| Requirement::ConditionalEffects),
-            map(tag(":fluent-actions"), |_| Requirement::FluentActions),
+                map(tag(":action-expansions"), |_| Requirement::ActionExpansions),
+                map(tag(":foreach-expansions"), |_| Requirement::ForeachExpansions),
+                map(tag(":dag-expansions"), |_| Requirement::DagExpansions),
+                map(tag(":domain-axioms"), |_| Requirement::DomainAxioms),
+                map(tag(":subgoals-through-axioms"), |_| Requirement::SubgoalsThroughAxioms),
+                map(tag(":safety-constraints"), |_| Requirement::SafetyConstraints),
+                map(tag(":expression-evaluation"), |_| Requirement::ExpressionEvaluation),
+                map(tag(":fluents"), |_| Requirement::Fluents),
+                map(tag(":open-world"), |_| Requirement::OpenWorld),
+                map(tag(":true-negation"), |_| Requirement::TrueNegation),
             map(tag(":adl"), |_| Requirement::Adl),
+                map(tag(":ucpop"), |_| Requirement::Ucpop),
+            )),
+            // PDDL 2.1
+            alt((
+                map(tag(":numeric-fluents"), |_| Requirement::NumericFluents),
             map(tag(":durative-actions"), |_| Requirement::DurativeActions),
-            map(tag(":durative-at-end"), |_| Requirement::DurativeAtEnd),
+                map(tag(":durative-inequalities"), |_| Requirement::DurativeInequalities),
             map(tag(":continuous-effects"), |_| Requirement::ContinuousEffects),
+                map(tag(":negative-preconditions"), |_| Requirement::NegativePreconditions),
+            )),
+            // PDDL 2.2
+            alt((
             map(tag(":derived-predicates"), |_| Requirement::DerivedPredicates),
             map(tag(":timed-initial-literals"), |_| Requirement::TimedInitialLiterals),
+            )),
+            // PDDL 3
+            alt((
             map(tag(":preferences"), |_| Requirement::Preferences),
             map(tag(":constraints"), |_| Requirement::Constraints),
-            map(tag(":action-costs"), |_| Requirement::ActionCosts),
+            )),
+            // PDDL+
+            alt((map(tag(":time"), |_| Requirement::Time),)),
         ))(input)
     }
 }
@@ -160,6 +204,15 @@ impl Domain {
             preceded(ws(tag(":requirements")), many0(ws(Requirement::parse_requirement))),
             char(')'),
         )(input)?;
+
+        for requirement in requirements.iter() {
+            match requirement {
+                Requirement::Typing => (),
+                Requirement::Strips => (),
+                e => return Err(nom::Err::Error(ParserError::UnsupportedRequirement(e.clone()))),
+            }
+        }
+
         Ok((output, requirements))
     }
 
