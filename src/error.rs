@@ -1,4 +1,5 @@
-use nom::{error::ParseError, Needed};
+use nom::error::ParseError;
+use nom::Needed;
 use thiserror::Error;
 
 use crate::domain::Requirement;

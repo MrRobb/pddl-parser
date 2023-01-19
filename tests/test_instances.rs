@@ -56,7 +56,8 @@ mod tests {
         let domain_file = folder.join("domain.pddl");
         if domain_file.exists() {
             vec![domain_file]
-        } else {
+        }
+        else {
             let folder = folder.join("domains");
             let domains = (1..)
                 .map(|i| folder.join(format!("domain-{}.pddl", i)))

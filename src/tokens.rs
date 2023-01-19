@@ -1,10 +1,9 @@
+use nom::branch::alt;
 use nom::bytes::complete::{tag, take_while};
 use nom::character::complete::{alpha1, alphanumeric1, char, line_ending, multispace0, not_line_ending};
 use nom::character::is_alphanumeric;
 use nom::combinator::{map, opt, recognize};
-use nom::{branch::alt, multi::many1};
-
-use nom::multi::many0_count;
+use nom::multi::{many0_count, many1};
 use nom::sequence::{delimited, pair, preceded};
 use nom::IResult;
 
