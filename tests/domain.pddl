@@ -1,5 +1,7 @@
-(define (domain letseat)
+; Test comment
+; Test multiline comment
 
+(define (domain letseat)
     (:requirements :typing)
 
     (:types
