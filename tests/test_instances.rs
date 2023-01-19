@@ -3,7 +3,6 @@ mod tests {
     use std::cell::RefCell;
     use std::path::{Path, PathBuf};
 
-    use cached::proc_macro::cached;
     use git2::build::{CheckoutBuilder, RepoBuilder};
     use git2::{FetchOptions, RemoteCallbacks};
     use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
@@ -57,8 +56,7 @@ mod tests {
         let domain_file = folder.join("domain.pddl");
         if domain_file.exists() {
             vec![domain_file]
-        }
-        else {
+        } else {
             let folder = folder.join("domains");
             let domains = (1..)
                 .map(|i| folder.join(format!("domain-{}.pddl", i)))
@@ -75,8 +73,9 @@ mod tests {
             .unwrap_or(false)
     }
 
-    #[cached]
-    fn generate_files() -> Vec<String> {
+    #[test]
+    #[ignore]
+    fn generate_files() {
         // Create temporary directory
         let tempdir = tempfile::tempdir().unwrap();
 
@@ -84,44 +83,44 @@ mod tests {
         let repo = Url::parse("https://github.com/potassco/pddl-instances").unwrap();
 
         // Clone the repository
+        // // Path is tests/pddl-instances
+        // let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        //     .join("tests")
+        //     .join("pddl-instances");
         clone(&repo, tempdir.path());
 
         // Iterate over all instances
-        tempdir
+        // path
+        let files = tempdir
             .path()
             .read_dir()
             .unwrap()
             .map(|ipc_year| ipc_year.unwrap().path())
             .filter(|ipc_year_folder| ipc_year_folder.is_dir() && !is_hidden(&ipc_year_folder))
             .map(|ipc_year_folder| ipc_year_folder.join("domains"))
-            .map(|domains_folder| {
+            .flat_map(|domains_folder| {
                 domains_folder
                     .read_dir()
                     .expect(&format!("No domains folder named {:?}", domains_folder))
-                    .map(|domain| get_domain_files(&domain.unwrap().path()))
-                    .map(|domains| {
-                        domains
-                            .into_iter()
-                            .map(|domain| std::fs::read_to_string(&domain).unwrap())
-                    })
-                    .flatten()
-            })
-            .flatten()
-            .collect()
-    }
+                    .flat_map(|domains| get_domain_files(&domains.unwrap().path()).into_iter())
+            });
 
-    #[test]
-    #[ignore]
-    fn parse_domain() {
-        for domain in generate_files().into_iter().progress() {
+        let pb = ProgressBar::new(1825).with_style(
+            ProgressStyle::default_bar()
+                .template("{spinner:.green} [{elapsed_precise}] {msg} [{wide_bar:.cyan/blue}] {pos}/{total} ({eta})")
+                .unwrap()
+                .progress_chars("=> "),
+        );
+
+        for path in files.progress_with(pb) {
+            let domain = std::fs::read_to_string(&path).unwrap();
             let res = Domain::parse(&domain);
             match res {
                 Ok(_) => (),
                 Err(e) => match e {
-                    ParserError::UnsupportedRequirement(r) => {
-                        panic!("Unsupported requirement: {r:?}");
-                    },
-                    ParserError::ParseError(_) => panic!("Parse error: {e}"),
+                    ParserError::UnsupportedRequirement(_) => {},
+                    ParserError::ParseError(e) => panic!("Parse error with error: {e:?}"),
+                    ParserError::IncompleteInput(e) => panic!("Incomplete input with error: {e:?}"),
                 },
             }
         }
