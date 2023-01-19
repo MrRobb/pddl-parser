@@ -57,21 +57,21 @@ impl Requirement {
     fn parse_requirement(input: &str) -> IResult<&str, Requirement, ParserError> {
         alt((
             // PDDL 1
-        alt((
-            map(tag(":strips"), |_| Requirement::Strips),
-            map(tag(":typing"), |_| Requirement::Typing),
-            map(tag(":disjunctive-preconditions"), |_| {
-                Requirement::DisjunctivePreconditions
-            }),
-            map(tag(":equality"), |_| Requirement::Equality),
-            map(tag(":existential-preconditions"), |_| {
-                Requirement::ExistentialPreconditions
-            }),
-            map(tag(":universal-preconditions"), |_| Requirement::UniversalPreconditions),
-            map(tag(":quantified-preconditions"), |_| {
-                Requirement::QuantifiedPreconditions
-            }),
-            map(tag(":conditional-effects"), |_| Requirement::ConditionalEffects),
+            alt((
+                map(tag(":strips"), |_| Requirement::Strips),
+                map(tag(":typing"), |_| Requirement::Typing),
+                map(tag(":disjunctive-preconditions"), |_| {
+                    Requirement::DisjunctivePreconditions
+                }),
+                map(tag(":equality"), |_| Requirement::Equality),
+                map(tag(":existential-preconditions"), |_| {
+                    Requirement::ExistentialPreconditions
+                }),
+                map(tag(":universal-preconditions"), |_| Requirement::UniversalPreconditions),
+                map(tag(":quantified-preconditions"), |_| {
+                    Requirement::QuantifiedPreconditions
+                }),
+                map(tag(":conditional-effects"), |_| Requirement::ConditionalEffects),
                 map(tag(":action-expansions"), |_| Requirement::ActionExpansions),
                 map(tag(":foreach-expansions"), |_| Requirement::ForeachExpansions),
                 map(tag(":dag-expansions"), |_| Requirement::DagExpansions),
@@ -82,26 +82,26 @@ impl Requirement {
                 map(tag(":fluents"), |_| Requirement::Fluents),
                 map(tag(":open-world"), |_| Requirement::OpenWorld),
                 map(tag(":true-negation"), |_| Requirement::TrueNegation),
-            map(tag(":adl"), |_| Requirement::Adl),
+                map(tag(":adl"), |_| Requirement::Adl),
                 map(tag(":ucpop"), |_| Requirement::Ucpop),
             )),
             // PDDL 2.1
             alt((
                 map(tag(":numeric-fluents"), |_| Requirement::NumericFluents),
-            map(tag(":durative-actions"), |_| Requirement::DurativeActions),
+                map(tag(":durative-actions"), |_| Requirement::DurativeActions),
                 map(tag(":durative-inequalities"), |_| Requirement::DurativeInequalities),
-            map(tag(":continuous-effects"), |_| Requirement::ContinuousEffects),
+                map(tag(":continuous-effects"), |_| Requirement::ContinuousEffects),
                 map(tag(":negative-preconditions"), |_| Requirement::NegativePreconditions),
             )),
             // PDDL 2.2
             alt((
-            map(tag(":derived-predicates"), |_| Requirement::DerivedPredicates),
-            map(tag(":timed-initial-literals"), |_| Requirement::TimedInitialLiterals),
+                map(tag(":derived-predicates"), |_| Requirement::DerivedPredicates),
+                map(tag(":timed-initial-literals"), |_| Requirement::TimedInitialLiterals),
             )),
             // PDDL 3
             alt((
-            map(tag(":preferences"), |_| Requirement::Preferences),
-            map(tag(":constraints"), |_| Requirement::Constraints),
+                map(tag(":preferences"), |_| Requirement::Preferences),
+                map(tag(":constraints"), |_| Requirement::Constraints),
             )),
             // PDDL+
             alt((map(tag(":time"), |_| Requirement::Time),)),
@@ -165,15 +165,15 @@ pub struct Domain {
 
 impl Domain {
     pub fn parse(input: &str) -> Result<Self, ParserError> {
-        let (_, domain) = delimited(
+        let (_, domain) = ws(delimited(
             char('('),
             preceded(ws(tag("define")), ws(Domain::parse_domain)),
             char(')'),
-        )(input)?;
+        ))(input)?;
         Ok(domain)
     }
 
-    fn parse_domain(input: &str) -> IResult<&str, Domain> {
+    fn parse_domain(input: &str) -> IResult<&str, Domain, ParserError> {
         let (output, (name, requirements, types, predicates, actions)) = tuple((
             ws(Domain::parse_name),
             ws(Domain::parse_requirements),
@@ -193,12 +193,12 @@ impl Domain {
         ))
     }
 
-    fn parse_name(input: &str) -> IResult<&str, String> {
+    fn parse_name(input: &str) -> IResult<&str, String, ParserError> {
         let (output, name) = delimited(char('('), preceded(ws(tag("domain")), ws(id)), char(')'))(input)?;
         Ok((output, name))
     }
 
-    fn parse_requirements(input: &str) -> IResult<&str, Vec<Requirement>> {
+    fn parse_requirements(input: &str) -> IResult<&str, Vec<Requirement>, ParserError> {
         let (output, requirements) = delimited(
             char('('),
             preceded(ws(tag(":requirements")), many0(ws(Requirement::parse_requirement))),
@@ -216,7 +216,7 @@ impl Domain {
         Ok((output, requirements))
     }
 
-    fn parse_types(input: &str) -> IResult<&str, Vec<Type>> {
+    fn parse_types(input: &str) -> IResult<&str, Vec<Type>, ParserError> {
         let (output, types) = delimited(
             char('('),
             preceded(
@@ -237,7 +237,7 @@ impl Domain {
         Ok((output, types))
     }
 
-    fn parse_predicates(input: &str) -> IResult<&str, Vec<Predicate>> {
+    fn parse_predicates(input: &str) -> IResult<&str, Vec<Predicate>, ParserError> {
         let (output, predicates) = delimited(
             char('('),
             preceded(
@@ -257,8 +257,8 @@ impl Domain {
         Ok((output, predicates))
     }
 
-    fn parse_parameters(input: &str) -> IResult<&str, Vec<Parameter>> {
-        let (output, params) = many0(separated_pair(many1(ws(var)), opt(char('-')), opt(ws(id))))(input)?;
+    fn parse_parameters(input: &str) -> IResult<&str, Vec<Parameter>, ParserError> {
+        let (output, params) = ws(many0(separated_pair(many1(ws(var)), opt(char('-')), opt(ws(id)))))(input)?;
         let params = params
             .into_iter()
             .flat_map(|(names, type_)| {
@@ -271,7 +271,7 @@ impl Domain {
         Ok((output, params))
     }
 
-    fn parse_actions(input: &str) -> IResult<&str, Vec<Action>> {
+    fn parse_actions(input: &str) -> IResult<&str, Vec<Action>, ParserError> {
         let (output, actions) = many0(ws(delimited(
             char('('),
             preceded(
@@ -300,12 +300,12 @@ impl Domain {
         Ok((output, actions))
     }
 
-    fn parse_expression(input: &str) -> IResult<&str, Expression> {
+    fn parse_expression(input: &str) -> IResult<&str, Expression, ParserError> {
         let (output, expression) = alt((Self::parse_and, Self::parse_not, Self::parse_pred))(input)?;
         Ok((output, expression))
     }
 
-    fn parse_and(input: &str) -> IResult<&str, Expression> {
+    fn parse_and(input: &str) -> IResult<&str, Expression, ParserError> {
         let (output, expressions) = map(
             ws(delimited(
                 char('('),
@@ -317,7 +317,7 @@ impl Domain {
         Ok((output, expressions))
     }
 
-    fn parse_not(input: &str) -> IResult<&str, Expression> {
+    fn parse_not(input: &str) -> IResult<&str, Expression, ParserError> {
         let (output, expressions) = map(
             ws(delimited(
                 char('('),
@@ -329,7 +329,7 @@ impl Domain {
         Ok((output, expressions))
     }
 
-    fn parse_pred(input: &str) -> IResult<&str, Expression> {
+    fn parse_pred(input: &str) -> IResult<&str, Expression, ParserError> {
         let (output, expressions) = map(
             ws(delimited(
                 char('('),

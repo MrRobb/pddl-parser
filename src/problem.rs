@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use nom::bytes::complete::tag;
 use nom::character::complete::char;
 use nom::multi::many0;
@@ -7,7 +5,10 @@ use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
-use crate::tokens::{id, ws};
+use crate::{
+    error::ParserError,
+    tokens::{id, ws},
+};
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Object {
@@ -36,17 +37,16 @@ pub struct Problem {
 }
 
 impl Problem {
-    pub fn parse(input: &str) -> Result<Self, Box<dyn Error>> {
+    pub fn parse(input: &str) -> Result<Self, ParserError> {
         let (_, problem) = delimited(
             char('('),
             preceded(ws(tag("define")), ws(Problem::parse_problem)),
             char(')'),
-        )(input)
-        .map_err(|e| format!("Failed to parse problem: {e}"))?;
+        )(input)?;
         Ok(problem)
     }
 
-    fn parse_problem(input: &str) -> IResult<&str, Problem> {
+    fn parse_problem(input: &str) -> IResult<&str, Problem, ParserError> {
         let (output, (name, domain, objects, init, goal)) = tuple((
             ws(Problem::parse_name),
             ws(Problem::parse_domain),
@@ -66,17 +66,17 @@ impl Problem {
         ))
     }
 
-    fn parse_name(input: &str) -> IResult<&str, String> {
+    fn parse_name(input: &str) -> IResult<&str, String, ParserError> {
         let (output, name) = delimited(char('('), preceded(ws(tag("problem")), ws(id)), char(')'))(input)?;
         Ok((output, name))
     }
 
-    fn parse_domain(input: &str) -> IResult<&str, String> {
+    fn parse_domain(input: &str) -> IResult<&str, String, ParserError> {
         let (output, domain) = delimited(char('('), preceded(ws(tag(":domain")), ws(id)), char(')'))(input)?;
         Ok((output, domain))
     }
 
-    fn parse_objects(input: &str) -> IResult<&str, Vec<Object>> {
+    fn parse_objects(input: &str) -> IResult<&str, Vec<Object>, ParserError> {
         let (output, objects) = delimited(
             char('('),
             preceded(
@@ -100,7 +100,7 @@ impl Problem {
         Ok((output, objects))
     }
 
-    fn parse_init(input: &str) -> IResult<&str, Vec<Predicate>> {
+    fn parse_init(input: &str) -> IResult<&str, Vec<Predicate>, ParserError> {
         let (output, init) = delimited(
             char('('),
             preceded(
@@ -117,12 +117,12 @@ impl Problem {
         Ok((output, init))
     }
 
-    fn parse_parameters(input: &str) -> IResult<&str, Vec<String>> {
+    fn parse_parameters(input: &str) -> IResult<&str, Vec<String>, ParserError> {
         let (output, parameters) = many0(ws(id))(input)?;
         Ok((output, parameters))
     }
 
-    fn parse_goal(input: &str) -> IResult<&str, Vec<Predicate>> {
+    fn parse_goal(input: &str) -> IResult<&str, Vec<Predicate>, ParserError> {
         let (output, goal) = delimited(
             char('('),
             preceded(

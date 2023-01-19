@@ -1,21 +1,23 @@
-use nom::branch::alt;
 use nom::bytes::complete::{tag, take_while};
 use nom::character::complete::{alpha1, alphanumeric1, char, line_ending, multispace0, not_line_ending};
 use nom::character::is_alphanumeric;
 use nom::combinator::{map, opt, recognize};
-use nom::error::ParseError;
+use nom::{branch::alt, multi::many1};
+
 use nom::multi::many0_count;
 use nom::sequence::{delimited, pair, preceded};
 use nom::IResult;
+
+use crate::error::ParserError;
 
 pub fn parse_id(input: &str) -> IResult<&str, String> {
     let (output, id) = map(take_while(|c: char| is_alphanumeric(c as u8) || c == '-'), String::from)(input)?;
     Ok((output, id))
 }
 
-pub fn ws<'a, F, O, E: ParseError<&'a str>>(inner: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
+pub fn ws<'a, F, O>(inner: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, ParserError>
 where
-    F: FnMut(&'a str) -> IResult<&'a str, O, E>,
+    F: FnMut(&'a str) -> IResult<&'a str, O, ParserError>,
 {
     delimited(
         multispace0,
@@ -28,7 +30,7 @@ where
     )
 }
 
-pub fn id(i: &str) -> IResult<&str, String> {
+pub fn id(i: &str) -> IResult<&str, String, ParserError> {
     let (input, identifier) = recognize(pair(
         alt((alpha1, tag("_"))),
         many0_count(alt((alphanumeric1, tag("_"), tag("-")))),
@@ -36,11 +38,10 @@ pub fn id(i: &str) -> IResult<&str, String> {
     Ok((input, identifier.to_string()))
 }
 
-pub fn var(i: &str) -> IResult<&str, String> {
-    let (input, identifier) = preceded(char('?'), id)(i)?;
-    Ok((input, identifier))
+pub fn var(i: &str) -> IResult<&str, String, ParserError> {
+    preceded(char('?'), id)(i)
 }
 
-pub fn comment<'a, E: ParseError<&'a str>>(i: &'a str) -> IResult<&'a str, &str, E> {
-    delimited(tag(";"), not_line_ending, line_ending)(i)
+pub fn comment<'a>(i: &'a str) -> IResult<&'a str, Vec<&str>, ParserError> {
+    many1(delimited(tag(";"), not_line_ending, line_ending))(i)
 }
