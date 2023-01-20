@@ -165,6 +165,7 @@ pub struct Domain {
 
 impl Domain {
     pub fn parse(input: &str) -> Result<Self, ParserError> {
+        puffin::profile_function!();
         let (_, domain) = ws(delimited(
             char('('),
             preceded(ws(tag("define")), ws(Domain::parse_domain)),
@@ -174,6 +175,7 @@ impl Domain {
     }
 
     fn parse_domain(input: &str) -> IResult<&str, Domain, ParserError> {
+        puffin::profile_function!();
         let (output, (name, requirements, types, predicates, actions)) = tuple((
             ws(Domain::parse_name),
             ws(Domain::parse_requirements),
@@ -194,11 +196,13 @@ impl Domain {
     }
 
     fn parse_name(input: &str) -> IResult<&str, String, ParserError> {
+        puffin::profile_function!();
         let (output, name) = delimited(char('('), preceded(ws(tag("domain")), ws(id)), char(')'))(input)?;
-        Ok((output, name))
+        Ok((output, name.to_string()))
     }
 
     fn parse_requirements(input: &str) -> IResult<&str, Vec<Requirement>, ParserError> {
+        puffin::profile_function!();
         let (output, requirements) = delimited(
             char('('),
             preceded(ws(tag(":requirements")), many0(ws(Requirement::parse_requirement))),
@@ -217,6 +221,7 @@ impl Domain {
     }
 
     fn parse_types(input: &str) -> IResult<&str, Vec<Type>, ParserError> {
+        puffin::profile_function!();
         let (output, types) = delimited(
             char('('),
             preceded(
@@ -229,8 +234,8 @@ impl Domain {
             .into_iter()
             .flat_map(|(names, parent)| {
                 names.into_iter().map(move |name| Type {
-                    name,
-                    parent: parent.clone(),
+                    name: name.to_string(),
+                    parent: parent.to_string(),
                 })
             })
             .collect();
@@ -238,6 +243,7 @@ impl Domain {
     }
 
     fn parse_predicates(input: &str) -> IResult<&str, Vec<Predicate>, ParserError> {
+        puffin::profile_function!();
         let (output, predicates) = delimited(
             char('('),
             preceded(
@@ -252,19 +258,23 @@ impl Domain {
         )(input)?;
         let predicates = predicates
             .into_iter()
-            .map(|(name, parameters)| Predicate { name, parameters })
+            .map(|(name, parameters)| Predicate {
+                name: name.to_string(),
+                parameters,
+            })
             .collect();
         Ok((output, predicates))
     }
 
     fn parse_parameters(input: &str) -> IResult<&str, Vec<Parameter>, ParserError> {
+        puffin::profile_function!();
         let (output, params) = ws(many0(separated_pair(many1(ws(var)), opt(char('-')), opt(ws(id)))))(input)?;
         let params = params
             .into_iter()
             .flat_map(|(names, type_)| {
                 names.into_iter().map(move |name| Parameter {
-                    name,
-                    type_: type_.clone().unwrap_or_else(object),
+                    name: name.to_string(),
+                    type_: type_.as_ref().map(|t| t.to_string()).unwrap_or_else(object),
                 })
             })
             .collect();
@@ -272,72 +282,66 @@ impl Domain {
     }
 
     fn parse_actions(input: &str) -> IResult<&str, Vec<Action>, ParserError> {
-        let (output, actions) = many0(ws(delimited(
-            char('('),
-            preceded(
-                ws(tag(":action")),
-                tuple((
-                    ws(id),
-                    ws(preceded(
-                        tag(":parameters"),
-                        ws(delimited(char('('), ws(Domain::parse_parameters), char(')'))),
+        puffin::profile_function!();
+        let (output, actions) = many0(ws(map(
+            delimited(
+                char('('),
+                preceded(
+                    ws(tag(":action")),
+                    tuple((
+                        ws(id),
+                        ws(preceded(
+                            tag(":parameters"),
+                            ws(delimited(char('('), ws(Domain::parse_parameters), char(')'))),
+                        )),
+                        ws(preceded(tag(":precondition"), ws(Domain::parse_expression))),
+                        ws(preceded(tag(":effect"), ws(Domain::parse_expression))),
                     )),
-                    ws(preceded(tag(":precondition"), ws(Domain::parse_expression))),
-                    ws(preceded(tag(":effect"), ws(Domain::parse_expression))),
-                )),
+                ),
+                char(')'),
             ),
-            char(')'),
-        )))(input)?;
-        let actions = actions
-            .into_iter()
-            .map(|(name, parameters, precondition, effect)| Action {
-                name,
+            |(name, parameters, precondition, effect)| Action {
+                name: name.to_string(),
                 parameters,
                 precondition,
                 effect,
-            })
-            .collect();
+            },
+        )))(input)?;
         Ok((output, actions))
     }
 
     fn parse_expression(input: &str) -> IResult<&str, Expression, ParserError> {
-        let (output, expression) = alt((Self::parse_and, Self::parse_not, Self::parse_pred))(input)?;
+        puffin::profile_function!();
+        let (output, expression) = alt((ws(Self::parse_and), ws(Self::parse_not), ws(Self::parse_predicate)))(input)?;
         Ok((output, expression))
     }
 
     fn parse_and(input: &str) -> IResult<&str, Expression, ParserError> {
-        let (output, expressions) = map(
-            ws(delimited(
-                char('('),
-                preceded(ws(tag("and")), many0(ws(Domain::parse_expression))),
-                char(')'),
-            )),
-            Expression::And,
+        puffin::profile_function!();
+        let (output, expressions) = delimited(
+            char('('),
+            preceded(ws(tag("and")), many0(Domain::parse_expression)),
+            char(')'),
         )(input)?;
-        Ok((output, expressions))
+        Ok((output, Expression::And(expressions)))
     }
 
     fn parse_not(input: &str) -> IResult<&str, Expression, ParserError> {
-        let (output, expressions) = map(
-            ws(delimited(
-                char('('),
-                preceded(ws(tag("not")), ws(Domain::parse_expression)),
-                char(')'),
-            )),
-            |e| Expression::Not(Box::new(e)),
-        )(input)?;
-        Ok((output, expressions))
+        puffin::profile_function!();
+        let (output, expression) =
+            delimited(char('('), preceded(ws(tag("not")), Domain::parse_expression), char(')'))(input)?;
+        Ok((output, Expression::Not(Box::new(expression))))
     }
 
-    fn parse_pred(input: &str) -> IResult<&str, Expression, ParserError> {
-        let (output, expressions) = map(
-            ws(delimited(
-                char('('),
-                pair(ws(id), ws(Self::parse_parameters)),
-                char(')'),
-            )),
-            |(name, parameters)| Expression::Predicate { name, parameters },
+    fn parse_predicate(input: &str) -> IResult<&str, Expression, ParserError> {
+        puffin::profile_function!();
+        let (output, expression) = map(
+            delimited(char('('), pair(ws(id), ws(Self::parse_parameters)), char(')')),
+            |(name, parameters)| Expression::Predicate {
+                name: name.to_string(),
+                parameters,
+            },
         )(input)?;
-        Ok((output, expressions))
+        Ok((output, expression))
     }
 }

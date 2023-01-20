@@ -66,12 +66,12 @@ impl Problem {
 
     fn parse_name(input: &str) -> IResult<&str, String, ParserError> {
         let (output, name) = delimited(char('('), preceded(ws(tag("problem")), ws(id)), char(')'))(input)?;
-        Ok((output, name))
+        Ok((output, name.to_string()))
     }
 
     fn parse_domain(input: &str) -> IResult<&str, String, ParserError> {
         let (output, domain) = delimited(char('('), preceded(ws(tag(":domain")), ws(id)), char(')'))(input)?;
-        Ok((output, domain))
+        Ok((output, domain.to_string()))
     }
 
     fn parse_objects(input: &str) -> IResult<&str, Vec<Object>, ParserError> {
@@ -89,8 +89,8 @@ impl Problem {
                 names
                     .into_iter()
                     .map(|name| Object {
-                        name,
-                        type_: type_.clone(),
+                        name: name.to_string(),
+                        type_: type_.to_string(),
                     })
                     .collect::<Vec<_>>()
             })
@@ -111,13 +111,19 @@ impl Problem {
             ),
             char(')'),
         )(input)?;
-        let init = init.into_iter().map(|(name, args)| Predicate { name, args }).collect();
+        let init = init
+            .into_iter()
+            .map(|(name, args)| Predicate {
+                name: name.to_string(),
+                args,
+            })
+            .collect();
         Ok((output, init))
     }
 
     fn parse_parameters(input: &str) -> IResult<&str, Vec<String>, ParserError> {
         let (output, parameters) = many0(ws(id))(input)?;
-        Ok((output, parameters))
+        Ok((output, parameters.into_iter().map(|s| s.to_string()).collect()))
     }
 
     fn parse_goal(input: &str) -> IResult<&str, Vec<Predicate>, ParserError> {
@@ -133,7 +139,13 @@ impl Problem {
             ),
             char(')'),
         )(input)?;
-        let goal = goal.into_iter().map(|(name, args)| Predicate { name, args }).collect();
+        let goal = goal
+            .into_iter()
+            .map(|(name, args)| Predicate {
+                name: name.to_string(),
+                args,
+            })
+            .collect();
         Ok((output, goal))
     }
 }

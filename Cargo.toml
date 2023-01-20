@@ -7,6 +7,12 @@ edition = "2021"
 nom = "7.1"
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
+profiling = { version = "1.0", features = ["profile-with-puffin"] }
+puffin_http = "0.11.0"
+simple_logger = "4.0.0"
+log = "0.4.17"
+puffin = "0.14.1"
+indicatif = "0.17"
 
 [dev-dependencies]
 # Benchmarking
@@ -20,12 +26,11 @@ tempfile = "3.3"
 cached = "0.42"
 
 [profile.release]
-lto = "fat"
-codegen-units = 1
+lto = true
+opt-level = 3
 
 [profile.test]
-lto = "fat"
-codegen-units = 1
+lto = true
 opt-level = 3
 
 [[bench]]
