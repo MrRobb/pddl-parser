@@ -9,11 +9,6 @@ use nom::{branch::alt, multi::many0};
 
 use crate::error::ParserError;
 
-pub fn parse_id(input: &str) -> IResult<&str, String> {
-    let (output, id) = map(take_while(|c: char| is_alphanumeric(c as u8) || c == '-'), String::from)(input)?;
-    Ok((output, id))
-}
-
 pub fn ws<'a, F, O>(inner: F) -> impl FnMut(&'a str) -> IResult<&'a str, O, ParserError>
 where
     F: FnMut(&'a str) -> IResult<&'a str, O, ParserError>,
