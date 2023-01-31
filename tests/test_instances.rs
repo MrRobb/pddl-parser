@@ -56,8 +56,7 @@ mod tests {
         let domain_file = folder.join("domain.pddl");
         if domain_file.exists() {
             vec![domain_file]
-        }
-        else {
+        } else {
             let folder = folder.join("domains");
             let domains = (1..)
                 .map(|i| folder.join(format!("domain-{}.pddl", i)))
@@ -102,7 +101,7 @@ mod tests {
             .flat_map(|domains_folder| {
                 domains_folder
                     .read_dir()
-                    .expect(&format!("No domains folder named {:?}", domains_folder))
+                    .unwrap_or_else(|_| panic!("No domains folder named {:?}", domains_folder))
                     .flat_map(|domains| get_domain_files(&domains.unwrap().path()).into_iter())
             });
 

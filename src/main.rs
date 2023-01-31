@@ -60,7 +60,7 @@ fn main() {
         .flat_map(|domains_folder| {
             domains_folder
                 .read_dir()
-                .expect(&format!("No domains folder named {:?}", domains_folder))
+                .unwrap_or_else(|_| panic!("No domains folder named {:?}", domains_folder))
                 .flat_map(|domains| get_domain_files(&domains.unwrap().path()).into_iter())
         });
 
