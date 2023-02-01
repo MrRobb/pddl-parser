@@ -1,3 +1,5 @@
+use std::string::ToString;
+
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::char;
@@ -209,10 +211,9 @@ impl Domain {
             char(')'),
         )(input)?;
 
-        for requirement in requirements.iter() {
+        for requirement in &requirements {
             match requirement {
-                Requirement::Typing => (),
-                Requirement::Strips => (),
+                Requirement::Strips | Requirement::Typing => (),
                 e => return Err(nom::Err::Error(ParserError::UnsupportedRequirement(e.clone()))),
             }
         }
@@ -274,7 +275,7 @@ impl Domain {
             .flat_map(|(names, type_)| {
                 names.into_iter().map(move |name| Parameter {
                     name: name.to_string(),
-                    type_: type_.as_ref().map(|t| t.to_string()).unwrap_or_else(object),
+                    type_: type_.as_ref().map_or_else(object, ToString::to_string),
                 })
             })
             .collect();

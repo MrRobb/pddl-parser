@@ -1,27 +1,33 @@
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
+use std::result::Result;
 
 use indicatif::{ProgressBar, ProgressStyle};
-use pddl_parser::{domain::Domain, error::ParserError};
+use pddl_parser::domain::Domain;
+use pddl_parser::error::ParserError;
 
 fn get_domain_files(folder: &Path) -> Vec<PathBuf> {
     let domain_file = folder.join("domain.pddl");
     if domain_file.exists() {
         vec![domain_file]
-    } else {
+    }
+    else {
         let folder = folder.join("domains");
-        let domains = (1..)
-            .map(|i| folder.join(format!("domain-{}.pddl", i)))
-            .take_while(|f| f.exists())
-            .collect();
-        domains
+        folder
+            .read_dir()
+            .unwrap()
+            .filter_map(Result::ok)
+            .filter(|e| e.file_type().unwrap().is_file())
+            .map(|e| e.path())
+            .filter(|p| p.extension().map_or(false, |e| e == "pddl") && p.starts_with("domain"))
+            .collect()
     }
 }
 
 fn is_hidden(path: &Path) -> bool {
     path.file_name()
-        .and_then(|s| s.to_str())
-        .map(|s| s.starts_with('.'))
-        .unwrap_or(false)
+        .and_then(OsStr::to_str)
+        .map_or(false, |s| s.starts_with('.'))
 }
 
 fn main() {
@@ -32,7 +38,7 @@ fn main() {
         .ok();
 
     let server_addr = format!("0.0.0.0:{}", puffin_http::DEFAULT_PORT);
-    eprintln!("Serving demo profile data on {}", server_addr);
+    eprintln!("Serving demo profile data on {server_addr}");
 
     let _puffin_server = puffin_http::Server::new(&server_addr).unwrap();
 
@@ -55,12 +61,12 @@ fn main() {
         .read_dir()
         .unwrap()
         .map(|ipc_year| ipc_year.unwrap().path())
-        .filter(|ipc_year_folder| ipc_year_folder.is_dir() && !is_hidden(&ipc_year_folder))
+        .filter(|ipc_year_folder| ipc_year_folder.is_dir() && !is_hidden(ipc_year_folder))
         .map(|ipc_year_folder| ipc_year_folder.join("domains"))
         .flat_map(|domains_folder| {
             domains_folder
                 .read_dir()
-                .unwrap_or_else(|_| panic!("No domains folder named {:?}", domains_folder))
+                .unwrap_or_else(|_| panic!("No domains folder named {domains_folder:?}"))
                 .flat_map(|domains| get_domain_files(&domains.unwrap().path()).into_iter())
         });
 
@@ -77,17 +83,14 @@ fn main() {
         pb.inc(1);
         puffin::profile_scope!("main_loop");
         puffin::GlobalProfiler::lock().new_frame();
-        pb.set_message(format!("(OK: {}, BAD: {}) Parsing {:?}", good, bad, path));
+        pb.set_message(format!("(OK: {good}, BAD: {bad}) Parsing {path:?}"));
         let domain = std::fs::read_to_string(&path).unwrap();
         let res = Domain::parse(&domain);
         match res {
             Ok(_) => good += 1,
             Err(e) => match e {
                 ParserError::UnsupportedRequirement(_) => {},
-                ParserError::ParseError(_) => {
-                    bad += 1;
-                },
-                ParserError::IncompleteInput(_) => {
+                ParserError::ParseError(_) | ParserError::IncompleteInput(_) => {
                     bad += 1;
                 },
             },

@@ -1,3 +1,5 @@
+use std::string::ToString;
+
 use nom::bytes::complete::tag;
 use nom::character::complete::char;
 use nom::multi::many0;
@@ -123,7 +125,7 @@ impl Problem {
 
     fn parse_parameters(input: &str) -> IResult<&str, Vec<String>, ParserError> {
         let (output, parameters) = many0(ws(id))(input)?;
-        Ok((output, parameters.into_iter().map(|s| s.to_string()).collect()))
+        Ok((output, parameters.into_iter().map(ToString::to_string).collect()))
     }
 
     fn parse_goal(input: &str) -> IResult<&str, Vec<Predicate>, ParserError> {

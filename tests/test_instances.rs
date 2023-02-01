@@ -1,6 +1,7 @@
 #[cfg(test)]
 mod tests {
     use std::cell::RefCell;
+    use std::ffi::OsStr;
     use std::path::{Path, PathBuf};
 
     use git2::build::{CheckoutBuilder, RepoBuilder};
@@ -56,21 +57,24 @@ mod tests {
         let domain_file = folder.join("domain.pddl");
         if domain_file.exists() {
             vec![domain_file]
-        } else {
+        }
+        else {
             let folder = folder.join("domains");
-            let domains = (1..)
-                .map(|i| folder.join(format!("domain-{}.pddl", i)))
-                .take_while(|f| f.exists())
-                .collect();
-            domains
+            folder
+                .read_dir()
+                .unwrap()
+                .filter_map(Result::ok)
+                .filter(|e| e.file_type().unwrap().is_file())
+                .map(|e| e.path())
+                .filter(|p| p.extension().map_or(false, |e| e == "pddl") && p.starts_with("domain"))
+                .collect()
         }
     }
 
     fn is_hidden(path: &Path) -> bool {
         path.file_name()
-            .and_then(|s| s.to_str())
-            .map(|s| s.starts_with('.'))
-            .unwrap_or(false)
+            .and_then(OsStr::to_str)
+            .map_or(false, |s| s.starts_with('.'))
     }
 
     #[test]
@@ -96,12 +100,12 @@ mod tests {
             .read_dir()
             .unwrap()
             .map(|ipc_year| ipc_year.unwrap().path())
-            .filter(|ipc_year_folder| ipc_year_folder.is_dir() && !is_hidden(&ipc_year_folder))
+            .filter(|ipc_year_folder| ipc_year_folder.is_dir() && !is_hidden(ipc_year_folder))
             .map(|ipc_year_folder| ipc_year_folder.join("domains"))
             .flat_map(|domains_folder| {
                 domains_folder
                     .read_dir()
-                    .unwrap_or_else(|_| panic!("No domains folder named {:?}", domains_folder))
+                    .unwrap_or_else(|_| panic!("No domains folder named {domains_folder:?}"))
                     .flat_map(|domains| get_domain_files(&domains.unwrap().path()).into_iter())
             });
 

@@ -8,10 +8,8 @@ use nom::sequence::{delimited, separated_pair};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    error::ParserError,
-    tokens::{id, ws},
-};
+use crate::error::ParserError;
+use crate::tokens::{id, ws};
 
 pub type Parameter = String;
 
