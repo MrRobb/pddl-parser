@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::fmt::Display;
 
 use nom::character::complete::{alphanumeric0, char, space1};
@@ -51,8 +50,8 @@ impl Display for Action {
 pub struct Plan(pub Vec<Action>);
 
 impl Plan {
-    pub fn parse(input: &str) -> Result<Self, Box<dyn Error>> {
-        let (_, plan) = many0(ws(Action::parse))(input).map_err(|e| format!("Failed to parse plan: {e}"))?;
+    pub fn parse(input: &str) -> Result<Self, ParserError> {
+        let (_, plan) = many0(ws(Action::parse))(input)?;
         Ok(Plan(plan))
     }
 
