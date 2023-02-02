@@ -78,10 +78,21 @@ mod tests {
                         args: vec!["table".to_string(), "plate".to_string(),],
                     }
                 ],
-                goal: vec![Predicate {
+                goal: Expression::Predicate {
                     name: "on".to_string(),
-                    args: vec!["cupcake".to_string(), "plate".to_string(),],
-                },]
+                    parameters: vec![
+                        Parameter {
+                            name: "cupcake".to_string(),
+                            // TODO: This type of predicate should not have an object type
+                            type_: "object".to_string()
+                        },
+                        Parameter {
+                            name: "plate".to_string(),
+                            // TODO: This type of predicate should not have an object type
+                            type_: "object".to_string()
+                        }
+                    ]
+                }
             }
         );
     }

@@ -29,10 +29,6 @@ cached = "0.42"
 lto = true
 opt-level = 3
 
-[profile.test]
-lto = true
-opt-level = 3
-
 [[bench]]
 name = "bench"
 harness = false

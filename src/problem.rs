@@ -7,6 +7,7 @@ use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
+use crate::domain::Expression;
 use crate::error::ParserError;
 use crate::tokens::{id, ws};
 
@@ -32,8 +33,7 @@ pub struct Problem {
     pub objects: Vec<Object>,
     #[serde(default)]
     pub init: Vec<Predicate>,
-    #[serde(default)]
-    pub goal: Vec<Predicate>,
+    pub goal: Expression,
 }
 
 impl Problem {
@@ -128,26 +128,12 @@ impl Problem {
         Ok((output, parameters.into_iter().map(ToString::to_string).collect()))
     }
 
-    fn parse_goal(input: &str) -> IResult<&str, Vec<Predicate>, ParserError> {
+    fn parse_goal(input: &str) -> IResult<&str, Expression, ParserError> {
         let (output, goal) = delimited(
             char('('),
-            preceded(
-                ws(tag(":goal")),
-                many0(ws(delimited(
-                    char('('),
-                    pair(ws(id), Problem::parse_parameters),
-                    char(')'),
-                ))),
-            ),
+            preceded(ws(tag(":goal")), ws(Expression::parse_expression)),
             char(')'),
         )(input)?;
-        let goal = goal
-            .into_iter()
-            .map(|(name, args)| Predicate {
-                name: name.to_string(),
-                args,
-            })
-            .collect();
         Ok((output, goal))
     }
 }
