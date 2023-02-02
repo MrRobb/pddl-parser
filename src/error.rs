@@ -9,10 +9,10 @@ pub enum ParserError {
     #[error("Unsupported PDDL Requirement: {0:?}")]
     UnsupportedRequirement(Requirement),
 
-    #[error("Parse error")]
+    #[error("Parse error: {0:?}")]
     ParseError(nom::error::Error<String>),
 
-    #[error("Incomplete input")]
+    #[error("Incomplete input: {0:?}")]
     IncompleteInput(Needed),
 }
 
