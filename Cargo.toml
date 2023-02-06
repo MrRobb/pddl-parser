@@ -13,6 +13,8 @@ simple_logger = "4.0.0"
 log = "0.4.17"
 puffin = "0.14.1"
 indicatif = "0.17"
+logos = "0.12"
+derive_more = "0.99"
 
 [dev-dependencies]
 # Benchmarking

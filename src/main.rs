@@ -90,7 +90,10 @@ fn main() {
             Ok(_) => good += 1,
             Err(e) => match e {
                 ParserError::UnsupportedRequirement(_) => {},
-                ParserError::ParseError(_) | ParserError::IncompleteInput(_) => {
+                ParserError::ParseError(_)
+                | ParserError::IncompleteInput(_)
+                | ParserError::ExpectedIdentifier
+                | ParserError::ExpectedToken(_) => {
                     bad += 1;
                 },
             },

@@ -123,6 +123,8 @@ mod tests {
                 Ok(_) => (),
                 Err(e) => match e {
                     ParserError::UnsupportedRequirement(_) => {},
+                    ParserError::ExpectedIdentifier => panic!("Expected identifier"),
+                    ParserError::ExpectedToken(t) => panic!("Expected token: {t:?}"),
                     ParserError::ParseError(e) => panic!("Parse error with error: {e:?}"),
                     ParserError::IncompleteInput(e) => panic!("Incomplete input with error: {e:?}"),
                 },

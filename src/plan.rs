@@ -1,42 +1,47 @@
 use std::fmt::Display;
 
-use nom::character::complete::{alphanumeric0, char, space1};
-use nom::combinator::map;
-use nom::multi::{many0, separated_list0};
-use nom::sequence::{delimited, separated_pair};
+use nom::multi::many0;
+use nom::sequence::{delimited, pair};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
 use crate::error::ParserError;
-use crate::tokens::{id, ws};
-
-pub type Parameter = String;
+use crate::lexer::{Token, TokenStream};
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Action {
     pub name: String,
     #[serde(default)]
-    pub parameters: Vec<Parameter>,
+    pub parameters: Vec<String>,
+}
+
+fn id2(i: TokenStream) -> IResult<TokenStream, String, ParserError> {
+    match i.peek() {
+        Some((Token::Id(s), _)) => Ok((i.advance(), s)),
+        _ => Err(nom::Err::Error(ParserError::ExpectedIdentifier)),
+    }
 }
 
 impl Action {
-    fn parse(input: &str) -> IResult<&str, Self, ParserError> {
+    pub const fn new(name: String, parameters: Vec<String>) -> Self {
+        Self { name, parameters }
+    }
+
+    fn parse(input: TokenStream) -> IResult<TokenStream, Self, ParserError> {
         let (output, (name, parameters)) = delimited(
-            char('('),
-            separated_pair(Action::parse_name, space1, Action::parse_parameters),
-            char(')'),
+            Token::OpenParen,
+            pair(Self::parse_name, Self::parse_parameters),
+            Token::CloseParen,
         )(input)?;
-        Ok((output, Action { name, parameters }))
+        Ok((output, Self::new(name, parameters)))
     }
 
-    fn parse_name(input: &str) -> IResult<&str, String, ParserError> {
-        let (output, name) = id(input)?;
-        Ok((output, name.to_string()))
+    fn parse_name(input: TokenStream) -> IResult<TokenStream, String, ParserError> {
+        id2(input)
     }
 
-    fn parse_parameters(input: &str) -> IResult<&str, Vec<Parameter>, ParserError> {
-        let (output, parameters) = separated_list0(space1, map(alphanumeric0, String::from))(input)?;
-        Ok((output, parameters))
+    fn parse_parameters(input: TokenStream) -> IResult<TokenStream, Vec<String>, ParserError> {
+        many0(id2)(input)
     }
 }
 
@@ -50,8 +55,8 @@ impl Display for Action {
 pub struct Plan(pub Vec<Action>);
 
 impl Plan {
-    pub fn parse(input: &str) -> Result<Self, ParserError> {
-        let (_, plan) = many0(ws(Action::parse))(input)?;
+    pub fn parse(input: TokenStream) -> Result<Self, ParserError> {
+        let (_, plan) = many0(Action::parse)(input)?;
         Ok(Plan(plan))
     }
 

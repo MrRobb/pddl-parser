@@ -3,6 +3,7 @@ use nom::Needed;
 use thiserror::Error;
 
 use crate::domain::Requirement;
+use crate::lexer::Token;
 
 #[derive(Error, Debug, PartialEq)]
 pub enum ParserError {
@@ -14,6 +15,12 @@ pub enum ParserError {
 
     #[error("Incomplete input: {0:?}")]
     IncompleteInput(Needed),
+
+    #[error("Expected identifier")]
+    ExpectedIdentifier,
+
+    #[error("Expected token: {0:?}")]
+    ExpectedToken(Token),
 }
 
 impl<I: ToString> ParseError<I> for ParserError {
@@ -37,6 +44,8 @@ impl From<nom::Err<ParserError>> for ParserError {
                 }),
                 ParserError::IncompleteInput(e) => ParserError::IncompleteInput(e),
                 ParserError::UnsupportedRequirement(e) => ParserError::UnsupportedRequirement(e),
+                ParserError::ExpectedIdentifier => ParserError::ExpectedIdentifier,
+                ParserError::ExpectedToken(e) => ParserError::ExpectedToken(e),
             },
         }
     }
