@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 use std::result::Result;
@@ -79,6 +80,7 @@ fn main() {
 
     let mut good = 0;
     let mut bad = 0;
+    let mut unsupported = HashMap::new();
     for path in files {
         pb.inc(1);
         puffin::profile_scope!("main_loop");
@@ -89,7 +91,11 @@ fn main() {
         match res {
             Ok(_) => good += 1,
             Err(e) => match e {
-                ParserError::UnsupportedRequirement(_) => {},
+                ParserError::UnsupportedRequirement(e) => {
+                    // Log the frequency of the unsupported requirements
+                    let counter = unsupported.entry(e).or_insert(0);
+                    *counter += 1;
+                },
                 ParserError::ParseError(_)
                 | ParserError::IncompleteInput(_)
                 | ParserError::ExpectedIdentifier
@@ -98,5 +104,10 @@ fn main() {
                 },
             },
         }
+    }
+    println!("OK: {good}, BAD: {bad}");
+    // Display the unsupported requirements
+    for (req, count) in unsupported {
+        println!("{req:?}: {count}");
     }
 }

@@ -11,7 +11,7 @@ use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::{id, var};
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, Hash)]
 pub enum Requirement {
     // PDDL 1
     Strips,
