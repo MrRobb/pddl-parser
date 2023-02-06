@@ -41,12 +41,11 @@ mod tests {
         );
     }
 
-    #[test]
     #[ignore]
     fn test_problem() {
         let problem_example = include_str!("../tests/problem.pddl");
         assert_eq!(
-            Problem::parse(problem_example).unwrap(),
+            Problem::parse(problem_example.into()).unwrap(),
             Problem {
                 name: "letseat-simple".to_string(),
                 domain: "letseat".to_string(),
@@ -110,7 +109,7 @@ mod tests {
     fn test_domain() {
         let domain_example = include_str!("../tests/domain.pddl");
         assert_eq!(
-            domain::Domain::parse(domain_example).unwrap(),
+            domain::Domain::parse(domain_example.into()).unwrap(),
             domain::Domain {
                 name: "letseat".to_string(),
                 requirements: vec![Requirement::Typing],

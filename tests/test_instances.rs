@@ -57,8 +57,7 @@ mod tests {
         let domain_file = folder.join("domain.pddl");
         if domain_file.exists() {
             vec![domain_file]
-        }
-        else {
+        } else {
             let folder = folder.join("domains");
             folder
                 .read_dir()
@@ -116,9 +115,11 @@ mod tests {
                 .progress_chars("=> "),
         );
 
-        for path in files.progress_with(pb) {
+        for path in files {
+            pb.inc(1);
             let domain = std::fs::read_to_string(&path).unwrap();
-            let res = Domain::parse(&domain);
+            pb.println(format!("Parsing {path:?}..."));
+            let res = Domain::parse(domain.as_str().into());
             match res {
                 Ok(_) => (),
                 Err(e) => match e {

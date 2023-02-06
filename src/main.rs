@@ -85,7 +85,7 @@ fn main() {
         puffin::GlobalProfiler::lock().new_frame();
         pb.set_message(format!("(OK: {good}, BAD: {bad}) Parsing {path:?}"));
         let domain = std::fs::read_to_string(&path).unwrap();
-        let res = Domain::parse(&domain);
+        let res = Domain::parse(domain.as_str().into());
         match res {
             Ok(_) => good += 1,
             Err(e) => match e {

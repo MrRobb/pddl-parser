@@ -1,7 +1,5 @@
 use std::string::ToString;
 
-use nom::bytes::complete::tag;
-use nom::character::complete::char;
 use nom::multi::many0;
 use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
 use nom::IResult;
@@ -9,7 +7,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::domain::Expression;
 use crate::error::ParserError;
-use crate::tokens::{id, ws};
+use crate::lexer::{Token, TokenStream};
+use crate::tokens::id;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Object {
@@ -37,22 +36,22 @@ pub struct Problem {
 }
 
 impl Problem {
-    pub fn parse(input: &str) -> Result<Self, ParserError> {
+    pub fn parse(input: TokenStream) -> Result<Self, ParserError> {
         let (_, problem) = delimited(
-            char('('),
-            preceded(ws(tag("define")), ws(Problem::parse_problem)),
-            char(')'),
+            Token::OpenParen,
+            preceded(Token::Define, Problem::parse_problem),
+            Token::CloseParen,
         )(input)?;
         Ok(problem)
     }
 
-    fn parse_problem(input: &str) -> IResult<&str, Problem, ParserError> {
+    fn parse_problem(input: TokenStream) -> IResult<TokenStream, Problem, ParserError> {
         let (output, (name, domain, objects, init, goal)) = tuple((
-            ws(Problem::parse_name),
-            ws(Problem::parse_domain),
-            ws(Problem::parse_objects),
-            ws(Problem::parse_init),
-            ws(Problem::parse_goal),
+            Problem::parse_name,
+            Problem::parse_domain,
+            Problem::parse_objects,
+            Problem::parse_init,
+            Problem::parse_goal,
         ))(input)?;
         Ok((
             output,
@@ -66,24 +65,21 @@ impl Problem {
         ))
     }
 
-    fn parse_name(input: &str) -> IResult<&str, String, ParserError> {
-        let (output, name) = delimited(char('('), preceded(ws(tag("problem")), ws(id)), char(')'))(input)?;
-        Ok((output, name.to_string()))
+    fn parse_name(input: TokenStream) -> IResult<TokenStream, String, ParserError> {
+        let (output, name) = delimited(Token::OpenParen, preceded(Token::Problem, id), Token::CloseParen)(input)?;
+        Ok((output, name))
     }
 
-    fn parse_domain(input: &str) -> IResult<&str, String, ParserError> {
-        let (output, domain) = delimited(char('('), preceded(ws(tag(":domain")), ws(id)), char(')'))(input)?;
-        Ok((output, domain.to_string()))
+    fn parse_domain(input: TokenStream) -> IResult<TokenStream, String, ParserError> {
+        let (output, domain) = delimited(Token::OpenParen, preceded(Token::Domain, id), Token::CloseParen)(input)?;
+        Ok((output, domain))
     }
 
-    fn parse_objects(input: &str) -> IResult<&str, Vec<Object>, ParserError> {
+    fn parse_objects(input: TokenStream) -> IResult<TokenStream, Vec<Object>, ParserError> {
         let (output, objects) = delimited(
-            char('('),
-            preceded(
-                ws(tag(":objects")),
-                ws(many0(separated_pair(many0(ws(id)), char('-'), ws(id)))),
-            ),
-            char(')'),
+            Token::OpenParen,
+            preceded(Token::Objects, many0(separated_pair(many0(id), Token::Dash, id))),
+            Token::CloseParen,
         )(input)?;
         let objects = objects
             .into_iter()
@@ -91,7 +87,7 @@ impl Problem {
                 names
                     .into_iter()
                     .map(|name| Object {
-                        name: name.to_string(),
+                        name,
                         type_: type_.to_string(),
                     })
                     .collect::<Vec<_>>()
@@ -100,39 +96,33 @@ impl Problem {
         Ok((output, objects))
     }
 
-    fn parse_init(input: &str) -> IResult<&str, Vec<Predicate>, ParserError> {
+    fn parse_init(input: TokenStream) -> IResult<TokenStream, Vec<Predicate>, ParserError> {
         let (output, init) = delimited(
-            char('('),
+            Token::OpenParen,
             preceded(
-                ws(tag(":init")),
-                many0(ws(delimited(
-                    char('('),
-                    pair(ws(id), Problem::parse_parameters),
-                    char(')'),
-                ))),
+                Token::Init,
+                many0(delimited(
+                    Token::OpenParen,
+                    pair(id, Problem::parse_parameters),
+                    Token::CloseParen,
+                )),
             ),
-            char(')'),
+            Token::CloseParen,
         )(input)?;
-        let init = init
-            .into_iter()
-            .map(|(name, args)| Predicate {
-                name: name.to_string(),
-                args,
-            })
-            .collect();
+        let init = init.into_iter().map(|(name, args)| Predicate { name, args }).collect();
         Ok((output, init))
     }
 
-    fn parse_parameters(input: &str) -> IResult<&str, Vec<String>, ParserError> {
-        let (output, parameters) = many0(ws(id))(input)?;
-        Ok((output, parameters.into_iter().map(ToString::to_string).collect()))
+    fn parse_parameters(input: TokenStream) -> IResult<TokenStream, Vec<String>, ParserError> {
+        let (output, parameters) = many0(id)(input)?;
+        Ok((output, parameters))
     }
 
-    fn parse_goal(input: &str) -> IResult<&str, Expression, ParserError> {
+    fn parse_goal(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
         let (output, goal) = delimited(
-            char('('),
-            preceded(ws(tag(":goal")), ws(Expression::parse_expression)),
-            char(')'),
+            Token::OpenParen,
+            preceded(Token::Goal, Expression::parse_expression),
+            Token::CloseParen,
         )(input)?;
         Ok((output, goal))
     }

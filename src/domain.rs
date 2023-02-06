@@ -1,8 +1,6 @@
 use std::string::ToString;
 
 use nom::branch::alt;
-use nom::bytes::complete::tag;
-use nom::character::complete::char;
 use nom::combinator::{map, opt};
 use nom::multi::{many0, many1};
 use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
@@ -10,7 +8,8 @@ use nom::IResult;
 use serde::{Deserialize, Serialize};
 
 use crate::error::ParserError;
-use crate::tokens::{id, var, ws};
+use crate::lexer::{Token, TokenStream};
+use crate::tokens::{id, var};
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub enum Requirement {
@@ -56,57 +55,55 @@ pub enum Requirement {
 }
 
 impl Requirement {
-    fn parse_requirement(input: &str) -> IResult<&str, Requirement, ParserError> {
+    fn parse_requirement(input: TokenStream) -> IResult<TokenStream, Requirement, ParserError> {
         alt((
             // PDDL 1
             alt((
-                map(tag(":strips"), |_| Requirement::Strips),
-                map(tag(":typing"), |_| Requirement::Typing),
-                map(tag(":disjunctive-preconditions"), |_| {
+                map(Token::Strips, |_| Requirement::Strips),
+                map(Token::Typing, |_| Requirement::Typing),
+                map(Token::DisjunctivePreconditions, |_| {
                     Requirement::DisjunctivePreconditions
                 }),
-                map(tag(":equality"), |_| Requirement::Equality),
-                map(tag(":existential-preconditions"), |_| {
+                map(Token::Equality, |_| Requirement::Equality),
+                map(Token::ExistentialPreconditions, |_| {
                     Requirement::ExistentialPreconditions
                 }),
-                map(tag(":universal-preconditions"), |_| Requirement::UniversalPreconditions),
-                map(tag(":quantified-preconditions"), |_| {
-                    Requirement::QuantifiedPreconditions
-                }),
-                map(tag(":conditional-effects"), |_| Requirement::ConditionalEffects),
-                map(tag(":action-expansions"), |_| Requirement::ActionExpansions),
-                map(tag(":foreach-expansions"), |_| Requirement::ForeachExpansions),
-                map(tag(":dag-expansions"), |_| Requirement::DagExpansions),
-                map(tag(":domain-axioms"), |_| Requirement::DomainAxioms),
-                map(tag(":subgoals-through-axioms"), |_| Requirement::SubgoalsThroughAxioms),
-                map(tag(":safety-constraints"), |_| Requirement::SafetyConstraints),
-                map(tag(":expression-evaluation"), |_| Requirement::ExpressionEvaluation),
-                map(tag(":fluents"), |_| Requirement::Fluents),
-                map(tag(":open-world"), |_| Requirement::OpenWorld),
-                map(tag(":true-negation"), |_| Requirement::TrueNegation),
-                map(tag(":adl"), |_| Requirement::Adl),
-                map(tag(":ucpop"), |_| Requirement::Ucpop),
+                map(Token::UniversalPreconditions, |_| Requirement::UniversalPreconditions),
+                map(Token::QuantifiedPreconditions, |_| Requirement::QuantifiedPreconditions),
+                map(Token::ConditionalEffects, |_| Requirement::ConditionalEffects),
+                map(Token::ActionExpansions, |_| Requirement::ActionExpansions),
+                map(Token::ForeachExpansions, |_| Requirement::ForeachExpansions),
+                map(Token::DagExpansions, |_| Requirement::DagExpansions),
+                map(Token::DomainAxioms, |_| Requirement::DomainAxioms),
+                map(Token::SubgoalsThroughAxioms, |_| Requirement::SubgoalsThroughAxioms),
+                map(Token::SafetyConstraints, |_| Requirement::SafetyConstraints),
+                map(Token::ExpressionEvaluation, |_| Requirement::ExpressionEvaluation),
+                map(Token::Fluents, |_| Requirement::Fluents),
+                map(Token::OpenWorld, |_| Requirement::OpenWorld),
+                map(Token::TrueNegation, |_| Requirement::TrueNegation),
+                map(Token::Adl, |_| Requirement::Adl),
+                map(Token::Ucpop, |_| Requirement::Ucpop),
             )),
             // PDDL 2.1
             alt((
-                map(tag(":numeric-fluents"), |_| Requirement::NumericFluents),
-                map(tag(":durative-actions"), |_| Requirement::DurativeActions),
-                map(tag(":durative-inequalities"), |_| Requirement::DurativeInequalities),
-                map(tag(":continuous-effects"), |_| Requirement::ContinuousEffects),
-                map(tag(":negative-preconditions"), |_| Requirement::NegativePreconditions),
+                map(Token::NumericFluents, |_| Requirement::NumericFluents),
+                map(Token::DurativeActions, |_| Requirement::DurativeActions),
+                map(Token::DurativeInequalities, |_| Requirement::DurativeInequalities),
+                map(Token::ContinuousEffects, |_| Requirement::ContinuousEffects),
+                map(Token::NegativePreconditions, |_| Requirement::NegativePreconditions),
             )),
             // PDDL 2.2
             alt((
-                map(tag(":derived-predicates"), |_| Requirement::DerivedPredicates),
-                map(tag(":timed-initial-literals"), |_| Requirement::TimedInitialLiterals),
+                map(Token::DerivedPredicates, |_| Requirement::DerivedPredicates),
+                map(Token::TimedInitialLiterals, |_| Requirement::TimedInitialLiterals),
             )),
             // PDDL 3
             alt((
-                map(tag(":preferences"), |_| Requirement::Preferences),
-                map(tag(":constraints"), |_| Requirement::Constraints),
+                map(Token::Preferences, |_| Requirement::Preferences),
+                map(Token::Constraints, |_| Requirement::Constraints),
             )),
-            // PDDL+
-            alt((map(tag(":time"), |_| Requirement::Time),)),
+            // PDLL+
+            map(Token::Time, |_| Requirement::Time),
         ))(input)
     }
 }
@@ -166,24 +163,24 @@ pub struct Domain {
 }
 
 impl Domain {
-    pub fn parse(input: &str) -> Result<Self, ParserError> {
+    pub fn parse(input: TokenStream) -> Result<Self, ParserError> {
         puffin::profile_function!();
-        let (_, domain) = ws(delimited(
-            char('('),
-            preceded(ws(tag("define")), ws(Domain::parse_domain)),
-            char(')'),
-        ))(input)?;
+        let (_, domain) = delimited(
+            Token::OpenParen,
+            preceded(Token::Define, Domain::parse_domain),
+            Token::CloseParen,
+        )(input)?;
         Ok(domain)
     }
 
-    fn parse_domain(input: &str) -> IResult<&str, Domain, ParserError> {
+    fn parse_domain(input: TokenStream) -> IResult<TokenStream, Domain, ParserError> {
         puffin::profile_function!();
         let (output, (name, requirements, types, predicates, actions)) = tuple((
-            ws(Domain::parse_name),
-            ws(Domain::parse_requirements),
-            ws(opt(Domain::parse_types)),
-            ws(Domain::parse_predicates),
-            ws(Domain::parse_actions),
+            Domain::parse_name,
+            Domain::parse_requirements,
+            opt(Domain::parse_types),
+            Domain::parse_predicates,
+            Domain::parse_actions,
         ))(input)?;
         Ok((
             output,
@@ -197,18 +194,18 @@ impl Domain {
         ))
     }
 
-    fn parse_name(input: &str) -> IResult<&str, String, ParserError> {
+    fn parse_name(input: TokenStream) -> IResult<TokenStream, String, ParserError> {
         puffin::profile_function!();
-        let (output, name) = delimited(char('('), preceded(ws(tag("domain")), ws(id)), char(')'))(input)?;
-        Ok((output, name.to_string()))
+        let (output, name) = delimited(Token::OpenParen, preceded(Token::Domain, id), Token::CloseParen)(input)?;
+        Ok((output, name))
     }
 
-    fn parse_requirements(input: &str) -> IResult<&str, Vec<Requirement>, ParserError> {
+    fn parse_requirements(input: TokenStream) -> IResult<TokenStream, Vec<Requirement>, ParserError> {
         puffin::profile_function!();
         let (output, requirements) = delimited(
-            char('('),
-            preceded(ws(tag(":requirements")), many0(ws(Requirement::parse_requirement))),
-            char(')'),
+            Token::OpenParen,
+            preceded(Token::Requirements, many0(Requirement::parse_requirement)),
+            Token::CloseParen,
         )(input)?;
 
         for requirement in &requirements {
@@ -221,21 +218,18 @@ impl Domain {
         Ok((output, requirements))
     }
 
-    fn parse_types(input: &str) -> IResult<&str, Vec<Type>, ParserError> {
+    fn parse_types(input: TokenStream) -> IResult<TokenStream, Vec<Type>, ParserError> {
         puffin::profile_function!();
         let (output, types) = delimited(
-            char('('),
-            preceded(
-                ws(tag(":types")),
-                ws(many0(separated_pair(many0(ws(id)), char('-'), ws(id)))),
-            ),
-            char(')'),
+            Token::OpenParen,
+            preceded(Token::Types, many0(separated_pair(many0(id), Token::Dash, id))),
+            Token::CloseParen,
         )(input)?;
         let types = types
             .into_iter()
             .flat_map(|(names, parent)| {
                 names.into_iter().map(move |name| Type {
-                    name: name.to_string(),
+                    name,
                     parent: parent.to_string(),
                 })
             })
@@ -243,64 +237,65 @@ impl Domain {
         Ok((output, types))
     }
 
-    fn parse_predicates(input: &str) -> IResult<&str, Vec<Predicate>, ParserError> {
+    fn parse_predicates(input: TokenStream) -> IResult<TokenStream, Vec<Predicate>, ParserError> {
         puffin::profile_function!();
         let (output, predicates) = delimited(
-            char('('),
+            Token::OpenParen,
             preceded(
-                ws(tag(":predicates")),
-                many0(ws(delimited(char('('), pair(ws(id), parse_parameters), char(')')))),
+                Token::Predicates,
+                many0(delimited(
+                    Token::OpenParen,
+                    pair(id, parse_parameters),
+                    Token::CloseParen,
+                )),
             ),
-            char(')'),
+            Token::CloseParen,
         )(input)?;
         let predicates = predicates
             .into_iter()
-            .map(|(name, parameters)| Predicate {
-                name: name.to_string(),
-                parameters,
-            })
+            .map(|(name, parameters)| Predicate { name, parameters })
             .collect();
         Ok((output, predicates))
     }
 
-    fn parse_actions(input: &str) -> IResult<&str, Vec<Action>, ParserError> {
+    fn parse_actions(input: TokenStream) -> IResult<TokenStream, Vec<Action>, ParserError> {
         puffin::profile_function!();
-        let (output, actions) = many0(ws(map(
+        let (output, actions) = many0(map(
             delimited(
-                char('('),
+                Token::OpenParen,
                 preceded(
-                    ws(tag(":action")),
+                    Token::Action,
                     tuple((
-                        ws(id),
-                        ws(preceded(
-                            tag(":parameters"),
-                            ws(delimited(char('('), ws(parse_parameters), char(')'))),
-                        )),
-                        ws(preceded(tag(":precondition"), ws(Expression::parse_expression))),
-                        ws(preceded(tag(":effect"), ws(Expression::parse_expression))),
+                        id,
+                        preceded(
+                            Token::Parameters,
+                            delimited(Token::OpenParen, parse_parameters, Token::CloseParen),
+                        ),
+                        preceded(Token::Precondition, Expression::parse_expression),
+                        preceded(Token::Effect, Expression::parse_expression),
                     )),
                 ),
-                char(')'),
+                Token::CloseParen,
             ),
             |(name, parameters, precondition, effect)| Action {
-                name: name.to_string(),
+                name,
                 parameters,
                 precondition,
                 effect,
             },
-        )))(input)?;
+        ))(input)?;
         Ok((output, actions))
     }
 }
 
-fn parse_parameters(input: &str) -> IResult<&str, Vec<Parameter>, ParserError> {
+fn parse_parameters(input: TokenStream) -> IResult<TokenStream, Vec<Parameter>, ParserError> {
     puffin::profile_function!();
-    let (output, params) = ws(many0(separated_pair(many1(ws(var)), opt(char('-')), opt(ws(id)))))(input)?;
+    let (output, params) = many0(separated_pair(many1(var), opt(Token::Dash), opt(id)))(input)?;
     let params = params
         .into_iter()
         .flat_map(|(names, type_)| {
             names.into_iter().map(move |name| Parameter {
-                name: name.to_string(),
+                name,
                 type_: type_.as_ref().map_or_else(object, ToString::to_string),
             })
         })
@@ -309,40 +304,37 @@ fn parse_parameters(input: &str) -> IResult<&str, Vec<Parameter>, ParserError> {
 }
 
 impl Expression {
-    pub fn parse_expression(input: &str) -> IResult<&str, Expression, ParserError> {
+    pub fn parse_expression(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
         puffin::profile_function!();
-        let (output, expression) = ws(alt((Self::parse_and, Self::parse_not, ws(Self::parse_predicate))))(input)?;
+        let (output, expression) = alt((Self::parse_and, Self::parse_not, Self::parse_predicate))(input)?;
         Ok((output, expression))
     }
 
-    fn parse_and(input: &str) -> IResult<&str, Expression, ParserError> {
+    fn parse_and(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
         puffin::profile_function!();
         let (output, expressions) = delimited(
-            char('('),
-            preceded(ws(tag("and")), many0(Expression::parse_expression)),
-            char(')'),
+            Token::OpenParen,
+            preceded(Token::And, many0(Expression::parse_expression)),
+            Token::CloseParen,
         )(input)?;
         Ok((output, Expression::And(expressions)))
     }
 
-    fn parse_not(input: &str) -> IResult<&str, Expression, ParserError> {
+    fn parse_not(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
         puffin::profile_function!();
         let (output, expression) = delimited(
-            char('('),
-            preceded(ws(tag("not")), Expression::parse_expression),
-            char(')'),
+            Token::OpenParen,
+            preceded(Token::Not, Expression::parse_expression),
+            Token::CloseParen,
         )(input)?;
         Ok((output, Expression::Not(Box::new(expression))))
     }
 
-    fn parse_predicate(input: &str) -> IResult<&str, Expression, ParserError> {
+    fn parse_predicate(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
         puffin::profile_function!();
         let (output, expression) = map(
-            delimited(char('('), pair(ws(id), ws(parse_parameters)), char(')')),
-            |(name, parameters)| Expression::Predicate {
-                name: name.to_string(),
-                parameters,
-            },
+            delimited(Token::OpenParen, pair(id, parse_parameters), Token::CloseParen),
+            |(name, parameters)| Expression::Predicate { name, parameters },
         )(input)?;
         Ok((output, expression))
     }

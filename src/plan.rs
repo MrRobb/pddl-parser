@@ -7,19 +7,13 @@ use serde::{Deserialize, Serialize};
 
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
+use crate::tokens::id;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Action {
     pub name: String,
     #[serde(default)]
     pub parameters: Vec<String>,
-}
-
-fn id2(i: TokenStream) -> IResult<TokenStream, String, ParserError> {
-    match i.peek() {
-        Some((Token::Id(s), _)) => Ok((i.advance(), s)),
-        _ => Err(nom::Err::Error(ParserError::ExpectedIdentifier)),
-    }
 }
 
 impl Action {
@@ -37,11 +31,11 @@ impl Action {
     }
 
     fn parse_name(input: TokenStream) -> IResult<TokenStream, String, ParserError> {
-        id2(input)
+        id(input)
     }
 
     fn parse_parameters(input: TokenStream) -> IResult<TokenStream, Vec<String>, ParserError> {
-        many0(id2)(input)
+        many0(id)(input)
     }
 }
 
