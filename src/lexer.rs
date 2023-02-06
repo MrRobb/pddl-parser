@@ -156,6 +156,13 @@ pub enum Token {
     #[token(":constraints")]
     Constraints,
 
+    // PDDL 3.1
+    #[token(":action-costs")]
+    ActionCosts,
+
+    #[token(":goal-utilities")]
+    GoalUtilities,
+
     // PDDL+
     #[token(":time")]
     Time,

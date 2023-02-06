@@ -50,6 +50,10 @@ pub enum Requirement {
     Preferences,
     Constraints,
 
+    // PDDL 3.1
+    ActionCosts,
+    GoalUtilities,
+
     // PDDL+
     Time,
 }
@@ -101,6 +105,11 @@ impl Requirement {
             alt((
                 map(Token::Preferences, |_| Requirement::Preferences),
                 map(Token::Constraints, |_| Requirement::Constraints),
+            )),
+            // PDDL 3.1
+            alt((
+                map(Token::ActionCosts, |_| Requirement::ActionCosts),
+                map(Token::GoalUtilities, |_| Requirement::GoalUtilities),
             )),
             // PDLL+
             map(Token::Time, |_| Requirement::Time),
