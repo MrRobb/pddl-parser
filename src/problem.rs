@@ -71,7 +71,8 @@ impl Problem {
     }
 
     fn parse_domain(input: TokenStream) -> IResult<TokenStream, String, ParserError> {
-        let (output, domain) = delimited(Token::OpenParen, preceded(Token::Domain, id), Token::CloseParen)(input)?;
+        let (output, domain) =
+            delimited(Token::OpenParen, preceded(Token::ProblemDomain, id), Token::CloseParen)(input)?;
         Ok((output, domain))
     }
 

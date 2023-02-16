@@ -15,7 +15,7 @@ pub mod tokens;
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::{self, Expression, Parameter, Requirement, Type};
+    use crate::domain::{self, Expression, Requirement, Type, TypedParameter};
     use crate::plan::{Action, Plan};
     use crate::problem::{Object, Predicate, Problem};
 
@@ -26,79 +26,68 @@ mod tests {
             Plan::parse(plan_example.into()).unwrap(),
             Plan(vec![
                 Action {
-                    name: "pick-up".to_string(),
-                    parameters: vec!["arm".to_string(), "cupcake".to_string(), "table".to_string()]
+                    name: "pick-up".into(),
+                    parameters: vec!["arm".into(), "cupcake".into(), "table".into()]
                 },
                 Action {
-                    name: "move".to_string(),
-                    parameters: vec!["arm".to_string(), "table".to_string(), "plate".to_string()]
+                    name: "move".into(),
+                    parameters: vec!["arm".into(), "table".into(), "plate".into()]
                 },
                 Action {
-                    name: "drop".to_string(),
-                    parameters: vec!["arm".to_string(), "cupcake".to_string(), "plate".to_string()]
+                    name: "drop".into(),
+                    parameters: vec!["arm".into(), "cupcake".into(), "plate".into()]
                 },
             ])
         );
     }
 
-    #[ignore]
+    #[test]
     fn test_problem() {
         let problem_example = include_str!("../tests/problem.pddl");
         assert_eq!(
             Problem::parse(problem_example.into()).unwrap(),
             Problem {
-                name: "letseat-simple".to_string(),
-                domain: "letseat".to_string(),
+                name: "letseat-simple".into(),
+                domain: "letseat".into(),
                 objects: vec![
                     Object {
-                        name: "arm".to_string(),
-                        type_: "robot".to_string(),
+                        name: "arm".into(),
+                        type_: "robot".into(),
                     },
                     Object {
-                        name: "cupcake".to_string(),
-                        type_: "cupcake".to_string(),
+                        name: "cupcake".into(),
+                        type_: "cupcake".into(),
                     },
                     Object {
-                        name: "table".to_string(),
-                        type_: "location".to_string(),
+                        name: "table".into(),
+                        type_: "location".into(),
                     },
                     Object {
-                        name: "plate".to_string(),
-                        type_: "location".to_string(),
+                        name: "plate".into(),
+                        type_: "location".into(),
                     },
                 ],
                 init: vec![
                     Predicate {
-                        name: "on".to_string(),
-                        args: vec!["arm".to_string(), "table".to_string(),],
+                        name: "on".into(),
+                        args: vec!["arm".into(), "table".into(),],
                     },
                     Predicate {
-                        name: "on".to_string(),
-                        args: vec!["cupcake".to_string(), "table".to_string(),],
+                        name: "on".into(),
+                        args: vec!["cupcake".into(), "table".into(),],
                     },
                     Predicate {
-                        name: "arm-empty".to_string(),
+                        name: "arm-empty".into(),
                         args: vec![],
                     },
                     Predicate {
-                        name: "path".to_string(),
-                        args: vec!["table".to_string(), "plate".to_string(),],
+                        name: "path".into(),
+                        args: vec!["table".into(), "plate".into(),],
                     }
                 ],
                 goal: Expression::Predicate {
-                    name: "on".to_string(),
-                    parameters: vec![
-                        Parameter {
-                            name: "cupcake".to_string(),
-                            // TODO: This type of predicate should not have an object type
-                            type_: "object".to_string()
-                        },
-                        Parameter {
-                            name: "plate".to_string(),
-                            // TODO: This type of predicate should not have an object type
-                            type_: "object".to_string()
-                        }
-                    ]
+                    name: "on".into(),
+                    parameters: vec!["cupcake".into(), "plate".into()]
                 }
             }
         );
@@ -111,304 +100,196 @@ mod tests {
         assert_eq!(
             domain::Domain::parse(domain_example.into()).unwrap(),
             domain::Domain {
-                name: "letseat".to_string(),
+                name: "letseat".into(),
                 requirements: vec![Requirement::Typing],
                 types: vec![
                     Type {
-                        name: "location".to_string(),
-                        parent: "object".to_string(),
+                        name: "location".into(),
+                        parent: "object".into(),
                     },
                     Type {
-                        name: "locatable".to_string(),
-                        parent: "object".to_string(),
+                        name: "locatable".into(),
+                        parent: "object".into(),
                     },
                     Type {
-                        name: "bot".to_string(),
-                        parent: "locatable".to_string(),
+                        name: "bot".into(),
+                        parent: "locatable".into(),
                     },
                     Type {
-                        name: "cupcake".to_string(),
-                        parent: "locatable".to_string(),
+                        name: "cupcake".into(),
+                        parent: "locatable".into(),
                     },
                     Type {
-                        name: "robot".to_string(),
-                        parent: "bot".to_string(),
+                        name: "robot".into(),
+                        parent: "bot".into(),
                     },
                 ],
                 predicates: vec![
-                    domain::Predicate {
-                        name: "on".to_string(),
+                    domain::TypedPredicate {
+                        name: "on".into(),
                         parameters: vec![
-                            domain::Parameter {
-                                name: "obj".to_string(),
-                                type_: "locatable".to_string(),
+                            domain::TypedParameter {
+                                name: "obj".into(),
+                                type_: "locatable".into(),
                             },
-                            domain::Parameter {
-                                name: "loc".to_string(),
-                                type_: "location".to_string(),
+                            domain::TypedParameter {
+                                name: "loc".into(),
+                                type_: "location".into(),
                             },
                         ],
                     },
-                    domain::Predicate {
-                        name: "holding".to_string(),
+                    domain::TypedPredicate {
+                        name: "holding".into(),
                         parameters: vec![
-                            domain::Parameter {
-                                name: "arm".to_string(),
-                                type_: "locatable".to_string(),
+                            domain::TypedParameter {
+                                name: "arm".into(),
+                                type_: "locatable".into(),
                             },
-                            domain::Parameter {
-                                name: "cupcake".to_string(),
-                                type_: "locatable".to_string(),
+                            domain::TypedParameter {
+                                name: "cupcake".into(),
+                                type_: "locatable".into(),
                             },
                         ],
                     },
-                    domain::Predicate {
-                        name: "arm-empty".to_string(),
+                    domain::TypedPredicate {
+                        name: "arm-empty".into(),
                         parameters: vec![],
                     },
-                    domain::Predicate {
-                        name: "path".to_string(),
+                    domain::TypedPredicate {
+                        name: "path".into(),
                         parameters: vec![
-                            domain::Parameter {
-                                name: "location1".to_string(),
-                                type_: "location".to_string(),
+                            domain::TypedParameter {
+                                name: "location1".into(),
+                                type_: "location".into(),
                             },
-                            domain::Parameter {
-                                name: "location2".to_string(),
-                                type_: "location".to_string(),
+                            domain::TypedParameter {
+                                name: "location2".into(),
+                                type_: "location".into(),
                             },
                         ],
                     },
                 ],
                 actions: vec![
                     domain::Action {
-                        name: "pick-up".to_string(),
+                        name: "pick-up".into(),
                         parameters: vec![
-                            domain::Parameter {
-                                name: "arm".to_string(),
-                                type_: "bot".to_string(),
+                            domain::TypedParameter {
+                                name: "arm".into(),
+                                type_: "bot".into(),
                             },
-                            domain::Parameter {
-                                name: "cupcake".to_string(),
-                                type_: "locatable".to_string(),
+                            domain::TypedParameter {
+                                name: "cupcake".into(),
+                                type_: "locatable".into(),
                             },
-                            domain::Parameter {
-                                name: "loc".to_string(),
-                                type_: "location".to_string(),
+                            domain::TypedParameter {
+                                name: "loc".into(),
+                                type_: "location".into(),
                             },
                         ],
                         precondition: Expression::And(vec![
                             Expression::Predicate {
-                                name: "on".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "arm".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "loc".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "on".into(),
+                                parameters: vec!["arm".into(), "loc".into()],
                             },
                             Expression::Predicate {
-                                name: "on".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "cupcake".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "loc".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "on".into(),
+                                parameters: vec!["cupcake".into(), "loc".into(),],
                             },
                             Expression::Predicate {
-                                name: "arm-empty".to_string(),
+                                name: "arm-empty".into(),
                                 parameters: vec![],
                             },
                         ]),
                         effect: Expression::And(vec![
                             Expression::Not(Box::new(Expression::Predicate {
-                                name: "on".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "cupcake".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "loc".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "on".into(),
+                                parameters: vec!["cupcake".into(), "loc".into()],
                             })),
                             Expression::Predicate {
-                                name: "holding".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "arm".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "cupcake".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "holding".into(),
+                                parameters: vec!["arm".into(), "cupcake".into()],
                             },
                             Expression::Not(Box::new(Expression::Predicate {
-                                name: "arm-empty".to_string(),
+                                name: "arm-empty".into(),
                                 parameters: vec![],
                             })),
                         ])
                     },
                     domain::Action {
-                        name: "drop".to_string(),
+                        name: "drop".into(),
                         parameters: vec![
-                            domain::Parameter {
-                                name: "arm".to_string(),
-                                type_: "bot".to_string(),
+                            domain::TypedParameter {
+                                name: "arm".into(),
+                                type_: "bot".into(),
                             },
-                            domain::Parameter {
-                                name: "cupcake".to_string(),
-                                type_: "locatable".to_string(),
+                            domain::TypedParameter {
+                                name: "cupcake".into(),
+                                type_: "locatable".into(),
                             },
-                            domain::Parameter {
-                                name: "loc".to_string(),
-                                type_: "location".to_string(),
+                            domain::TypedParameter {
+                                name: "loc".into(),
+                                type_: "location".into(),
                             },
                         ],
                         precondition: Expression::And(vec![
                             Expression::Predicate {
-                                name: "on".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "arm".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "loc".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "on".into(),
+                                parameters: vec!["arm".into(), "loc".into(),],
                             },
                             Expression::Predicate {
-                                name: "holding".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "arm".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "cupcake".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "holding".into(),
+                                parameters: vec!["arm".into(), "cupcake".into(),],
                             },
                         ]),
                         effect: Expression::And(vec![
                             Expression::Predicate {
-                                name: "on".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "cupcake".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "loc".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "on".into(),
+                                parameters: vec!["cupcake".into(), "loc".into(),],
                             },
                             Expression::Predicate {
-                                name: "arm-empty".to_string(),
+                                name: "arm-empty".into(),
                                 parameters: vec![],
                             },
                             Expression::Not(Box::new(Expression::Predicate {
-                                name: "holding".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "arm".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "cupcake".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "holding".into(),
+                                parameters: vec!["arm".into(), "cupcake".into(),],
                             })),
                         ])
                     },
                     domain::Action {
-                        name: "move".to_string(),
+                        name: "move".into(),
                         parameters: vec![
-                            Parameter {
-                                name: "arm".to_string(),
-                                type_: "bot".to_string(),
+                            TypedParameter {
+                                name: "arm".into(),
+                                type_: "bot".into(),
                             },
-                            Parameter {
-                                name: "from".to_string(),
-                                type_: "location".to_string(),
+                            TypedParameter {
+                                name: "from".into(),
+                                type_: "location".into(),
                             },
-                            Parameter {
-                                name: "to".to_string(),
-                                type_: "location".to_string(),
+                            TypedParameter {
+                                name: "to".into(),
+                                type_: "location".into(),
                             },
                         ],
                         precondition: Expression::And(vec![
                             Expression::Predicate {
-                                name: "on".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "arm".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "from".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "on".into(),
+                                parameters: vec!["arm".into(), "from".into(),],
                             },
                             Expression::Predicate {
-                                name: "path".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "from".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "to".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "path".into(),
+                                parameters: vec!["from".into(), "to".into(),],
                             },
                         ]),
                         effect: Expression::And(vec![
                             Expression::Not(Box::new(Expression::Predicate {
-                                name: "on".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "arm".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "from".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "on".into(),
+                                parameters: vec!["arm".into(), "from".into(),],
                             })),
                             Expression::Predicate {
-                                name: "on".to_string(),
-                                parameters: vec![
-                                    Parameter {
-                                        name: "arm".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                    Parameter {
-                                        name: "to".to_string(),
-                                        type_: "object".to_string(),
-                                    },
-                                ],
+                                name: "on".into(),
+                                parameters: vec!["arm".into(), "to".into(),],
                             },
                         ])
                     }

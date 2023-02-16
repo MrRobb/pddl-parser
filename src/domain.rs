@@ -130,12 +130,21 @@ pub struct Predicate {
     pub parameters: Vec<Parameter>,
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+pub struct TypedPredicate {
+    pub name: String,
+    #[serde(default)]
+    pub parameters: Vec<TypedParameter>,
+}
+
 fn object() -> String {
     "object".to_string()
 }
 
+pub type Parameter = String;
+
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
-pub struct Parameter {
+pub struct TypedParameter {
     pub name: String,
     #[serde(rename = "type")]
     #[serde(default = "object")]
@@ -154,10 +163,21 @@ pub enum Expression {
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+pub enum TypedExpression {
+    Predicate {
+        name: String,
+        #[serde(default)]
+        parameters: Vec<Parameter>,
+    },
+    And(Vec<Expression>),
+    Not(Box<Expression>),
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Action {
     pub name: String,
     #[serde(default)]
-    pub parameters: Vec<Parameter>,
+    pub parameters: Vec<TypedParameter>,
     pub precondition: Expression,
     pub effect: Expression,
 }
@@ -167,7 +187,7 @@ pub struct Domain {
     pub name: String,
     pub requirements: Vec<Requirement>,
     pub types: Vec<Type>,
-    pub predicates: Vec<Predicate>,
+    pub predicates: Vec<TypedPredicate>,
     pub actions: Vec<Action>,
 }
 
@@ -246,7 +266,22 @@ impl Domain {
         Ok((output, types))
     }
 
-    fn parse_predicates(input: TokenStream) -> IResult<TokenStream, Vec<Predicate>, ParserError> {
+    fn parse_typed_parameters(input: TokenStream) -> IResult<TokenStream, Vec<TypedParameter>, ParserError> {
+        puffin::profile_function!();
+        let (output, params) = many0(pair(many1(var), opt(preceded(Token::Dash, id))))(input)?;
+        let params = params
+            .into_iter()
+            .flat_map(|(names, type_)| {
+                names.into_iter().map(move |name| TypedParameter {
+                    name,
+                    type_: type_.as_ref().map_or_else(object, ToString::to_string),
+                })
+            })
+            .collect();
+        Ok((output, params))
+    }
+
+    fn parse_predicates(input: TokenStream) -> IResult<TokenStream, Vec<TypedPredicate>, ParserError> {
         puffin::profile_function!();
         let (output, predicates) = delimited(
             Token::OpenParen,
@@ -254,7 +289,7 @@ impl Domain {
                 Token::Predicates,
                 many0(delimited(
                     Token::OpenParen,
-                    pair(id, parse_parameters),
+                    pair(id, Self::parse_typed_parameters),
                     Token::CloseParen,
                 )),
             ),
@@ -262,7 +297,7 @@ impl Domain {
         )(input)?;
         let predicates = predicates
             .into_iter()
-            .map(|(name, parameters)| Predicate { name, parameters })
+            .map(|(name, parameters)| TypedPredicate { name, parameters })
             .collect();
         Ok((output, predicates))
     }
@@ -278,7 +313,7 @@ impl Domain {
                         id,
                         preceded(
                             Token::Parameters,
-                            delimited(Token::OpenParen, parse_parameters, Token::CloseParen),
+                            delimited(Token::OpenParen, Self::parse_typed_parameters, Token::CloseParen),
                         ),
                         preceded(Token::Precondition, Expression::parse_expression),
                         preceded(Token::Effect, Expression::parse_expression),
@@ -295,21 +330,6 @@ impl Domain {
         ))(input)?;
         Ok((output, actions))
     }
-}
-
-fn parse_parameters(input: TokenStream) -> IResult<TokenStream, Vec<Parameter>, ParserError> {
-    puffin::profile_function!();
-    let (output, params) = many0(separated_pair(many1(var), opt(Token::Dash), opt(id)))(input)?;
-    let params = params
-        .into_iter()
-        .flat_map(|(names, type_)| {
-            names.into_iter().map(move |name| Parameter {
-                name,
-                type_: type_.as_ref().map_or_else(object, ToString::to_string),
-            })
-        })
-        .collect();
-    Ok((output, params))
 }
 
 impl Expression {
@@ -342,9 +362,15 @@ impl Expression {
     fn parse_predicate(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
         puffin::profile_function!();
         let (output, expression) = map(
-            delimited(Token::OpenParen, pair(id, parse_parameters), Token::CloseParen),
+            delimited(Token::OpenParen, pair(id, Self::parse_parameters), Token::CloseParen),
             |(name, parameters)| Expression::Predicate { name, parameters },
         )(input)?;
         Ok((output, expression))
+    }
+
+    fn parse_parameters(input: TokenStream) -> IResult<TokenStream, Vec<String>, ParserError> {
+        puffin::profile_function!();
+        let (output, params) = many0(alt((id, var)))(input)?;
+        Ok((output, params))
     }
 }
