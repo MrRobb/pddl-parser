@@ -18,7 +18,7 @@ pub enum Token {
     #[token("define")]
     Define,
 
-    #[token(":problem")]
+    #[token("problem")]
     Problem,
 
     #[token(":objects")]
@@ -26,6 +26,9 @@ pub enum Token {
 
     #[token("domain")]
     Domain,
+
+    #[token(":domain")]
+    ProblemDomain,
 
     #[token(":requirements")]
     Requirements,
