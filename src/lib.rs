@@ -15,7 +15,7 @@ pub mod tokens;
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::{self, Expression, Requirement, Type, TypedParameter};
+    use crate::domain::{self, Expression, Requirement, TypeDef, TypedParameter};
     use crate::plan::{Action, Plan};
     use crate::problem::{Object, Predicate, Problem};
 
@@ -85,7 +85,7 @@ mod tests {
                         args: vec!["table".into(), "plate".into(),],
                     }
                 ],
-                goal: Expression::Predicate {
+                goal: Expression::Atom {
                     name: "on".into(),
                     parameters: vec!["cupcake".into(), "plate".into()]
                 }
@@ -96,6 +96,8 @@ mod tests {
     #[test]
     #[allow(clippy::too_many_lines)]
     fn test_domain() {
+        std::env::set_var("RUST_LOG", "debug");
+        pretty_env_logger::init();
         let domain_example = include_str!("../tests/domain.pddl");
         assert_eq!(
             domain::Domain::parse(domain_example.into()).unwrap(),
@@ -103,27 +105,28 @@ mod tests {
                 name: "letseat".into(),
                 requirements: vec![Requirement::Typing],
                 types: vec![
-                    Type {
+                    TypeDef {
                         name: "location".into(),
                         parent: "object".into(),
                     },
-                    Type {
+                    TypeDef {
                         name: "locatable".into(),
                         parent: "object".into(),
                     },
-                    Type {
+                    TypeDef {
                         name: "bot".into(),
                         parent: "locatable".into(),
                     },
-                    Type {
+                    TypeDef {
                         name: "cupcake".into(),
                         parent: "locatable".into(),
                     },
-                    Type {
+                    TypeDef {
                         name: "robot".into(),
                         parent: "bot".into(),
                     },
                 ],
+                constants: vec![],
                 predicates: vec![
                     domain::TypedPredicate {
                         name: "on".into(),
@@ -169,6 +172,7 @@ mod tests {
                         ],
                     },
                 ],
+                functions: vec![],
                 actions: vec![
                     domain::Action {
                         name: "pick-up".into(),
@@ -186,30 +190,30 @@ mod tests {
                                 type_: "location".into(),
                             },
                         ],
-                        precondition: Expression::And(vec![
-                            Expression::Predicate {
+                        precondition: Some(Expression::And(vec![
+                            Expression::Atom {
                                 name: "on".into(),
                                 parameters: vec!["arm".into(), "loc".into()],
                             },
-                            Expression::Predicate {
+                            Expression::Atom {
                                 name: "on".into(),
                                 parameters: vec!["cupcake".into(), "loc".into(),],
                             },
-                            Expression::Predicate {
+                            Expression::Atom {
                                 name: "arm-empty".into(),
                                 parameters: vec![],
                             },
-                        ]),
+                        ])),
                         effect: Expression::And(vec![
-                            Expression::Not(Box::new(Expression::Predicate {
+                            Expression::Not(Box::new(Expression::Atom {
                                 name: "on".into(),
                                 parameters: vec!["cupcake".into(), "loc".into()],
                             })),
-                            Expression::Predicate {
+                            Expression::Atom {
                                 name: "holding".into(),
                                 parameters: vec!["arm".into(), "cupcake".into()],
                             },
-                            Expression::Not(Box::new(Expression::Predicate {
+                            Expression::Not(Box::new(Expression::Atom {
                                 name: "arm-empty".into(),
                                 parameters: vec![],
                             })),
@@ -231,26 +235,26 @@ mod tests {
                                 type_: "location".into(),
                             },
                         ],
-                        precondition: Expression::And(vec![
-                            Expression::Predicate {
+                        precondition: Some(Expression::And(vec![
+                            Expression::Atom {
                                 name: "on".into(),
                                 parameters: vec!["arm".into(), "loc".into(),],
                             },
-                            Expression::Predicate {
+                            Expression::Atom {
                                 name: "holding".into(),
                                 parameters: vec!["arm".into(), "cupcake".into(),],
                             },
-                        ]),
+                        ])),
                         effect: Expression::And(vec![
-                            Expression::Predicate {
+                            Expression::Atom {
                                 name: "on".into(),
                                 parameters: vec!["cupcake".into(), "loc".into(),],
                             },
-                            Expression::Predicate {
+                            Expression::Atom {
                                 name: "arm-empty".into(),
                                 parameters: vec![],
                             },
-                            Expression::Not(Box::new(Expression::Predicate {
+                            Expression::Not(Box::new(Expression::Atom {
                                 name: "holding".into(),
                                 parameters: vec!["arm".into(), "cupcake".into(),],
                             })),
@@ -272,22 +276,22 @@ mod tests {
                                 type_: "location".into(),
                             },
                         ],
-                        precondition: Expression::And(vec![
-                            Expression::Predicate {
+                        precondition: Some(Expression::And(vec![
+                            Expression::Atom {
                                 name: "on".into(),
                                 parameters: vec!["arm".into(), "from".into(),],
                             },
-                            Expression::Predicate {
+                            Expression::Atom {
                                 name: "path".into(),
                                 parameters: vec!["from".into(), "to".into(),],
                             },
-                        ]),
+                        ])),
                         effect: Expression::And(vec![
-                            Expression::Not(Box::new(Expression::Predicate {
+                            Expression::Not(Box::new(Expression::Atom {
                                 name: "on".into(),
                                 parameters: vec!["arm".into(), "from".into(),],
                             })),
-                            Expression::Predicate {
+                            Expression::Atom {
                                 name: "on".into(),
                                 parameters: vec!["arm".into(), "to".into(),],
                             },
