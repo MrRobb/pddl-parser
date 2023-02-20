@@ -1,173 +1,215 @@
+use std::ops::Range;
+
 use derive_more::Display;
 use logos::Logos;
 use nom::InputLength;
 
 use crate::error::ParserError;
 
-#[derive(Debug, Display, Clone, PartialEq, Eq, Logos)]
+#[derive(Debug, Display, Clone, PartialEq, Logos)]
 pub enum Token {
     // Open parenthesis
-    #[token("(")]
+    #[regex(r"\([ \t\n\f]*")]
     OpenParen,
 
     // Close parenthesis
-    #[token(")")]
+    #[regex(r"\)[ \t\n\f]*")]
     CloseParen,
 
     // PDDL Keywords
-    #[token("define")]
+    #[token("define", ignore(ascii_case))]
     Define,
 
-    #[token("problem")]
+    #[token("problem", ignore(ascii_case))]
     Problem,
 
-    #[token(":objects")]
+    #[token(":objects", ignore(ascii_case))]
     Objects,
 
-    #[token("domain")]
+    #[token("domain", ignore(ascii_case))]
     Domain,
 
-    #[token(":domain")]
+    #[token(":domain", ignore(ascii_case))]
     ProblemDomain,
 
-    #[token(":requirements")]
+    #[token(":requirements", ignore(ascii_case))]
     Requirements,
 
-    #[token(":types")]
+    #[token(":types", ignore(ascii_case))]
     Types,
 
-    #[token(":constants")]
+    #[token(":constants", ignore(ascii_case))]
     Constants,
 
-    #[token(":predicates")]
+    #[token(":predicates", ignore(ascii_case))]
     Predicates,
 
-    #[token(":action")]
+    #[token(":functions", ignore(ascii_case))]
+    Functions,
+
+    #[token(":action", ignore(ascii_case))]
     Action,
 
-    #[token(":parameters")]
+    #[token(":parameters", ignore(ascii_case))]
     Parameters,
 
-    #[token(":precondition")]
+    #[token(":precondition", ignore(ascii_case))]
     Precondition,
 
-    #[token(":effect")]
+    #[token(":effect", ignore(ascii_case))]
     Effect,
 
-    #[token(":init")]
+    #[token(":init", ignore(ascii_case))]
     Init,
 
-    #[token(":goal")]
+    #[token(":goal", ignore(ascii_case))]
     Goal,
 
-    #[token("and")]
+    #[token("and", ignore(ascii_case))]
     And,
 
-    #[token("not")]
+    #[token("not", ignore(ascii_case))]
     Not,
+
+    #[token("either", ignore(ascii_case))]
+    Either,
+
+    #[token("assign", ignore(ascii_case))]
+    Assign,
+
+    #[token("scale-up", ignore(ascii_case))]
+    ScaleUp,
+
+    #[token("scale-down", ignore(ascii_case))]
+    ScaleDown,
+
+    #[token("increase", ignore(ascii_case))]
+    Increase,
+
+    #[token("decrease", ignore(ascii_case))]
+    Decrease,
+
+    // Number (positive or negative)
+    #[regex(r"-?[0-9]+", |lex| lex.slice().parse())]
+    Integer(i64),
+
+    // Float
+    #[regex(r"[0-9]+\.[0-9]+", |lex| lex.slice().parse())]
+    Float(f64),
+
+    // Math operators
+    #[token("+")]
+    Plus,
+
+    #[token("*")]
+    Times,
+
+    #[token("/")]
+    Divide,
 
     // PDDL Requirements
 
     // PDDL 1
-    #[token(":strips")]
+    #[token(":strips", ignore(ascii_case))]
     Strips,
 
-    #[token(":typing")]
+    #[token(":typing", ignore(ascii_case))]
     Typing,
 
-    #[token(":disjunctive-preconditions")]
+    #[token(":disjunctive-preconditions", ignore(ascii_case))]
     DisjunctivePreconditions,
 
-    #[token(":equality")]
+    #[token(":equality", ignore(ascii_case))]
     Equality,
 
-    #[token(":existential-preconditions")]
+    #[token(":existential-preconditions", ignore(ascii_case))]
     ExistentialPreconditions,
 
-    #[token(":universal-preconditions")]
+    #[token(":universal-preconditions", ignore(ascii_case))]
     UniversalPreconditions,
 
-    #[token(":quantified-preconditions")]
+    #[token(":quantified-preconditions", ignore(ascii_case))]
     QuantifiedPreconditions,
 
-    #[token(":conditional-effects")]
+    #[token(":conditional-effects", ignore(ascii_case))]
     ConditionalEffects,
 
-    #[token(":action-expansions")]
+    #[token(":action-expansions", ignore(ascii_case))]
     ActionExpansions,
 
-    #[token(":foreach-expansions")]
+    #[token(":foreach-expansions", ignore(ascii_case))]
     ForeachExpansions,
 
-    #[token(":dag-expansions")]
+    #[token(":dag-expansions", ignore(ascii_case))]
     DagExpansions,
 
-    #[token(":domain-axioms")]
+    #[token(":domain-axioms", ignore(ascii_case))]
     DomainAxioms,
 
-    #[token(":subgoals-through-axioms")]
+    #[token(":subgoals-through-axioms", ignore(ascii_case))]
     SubgoalsThroughAxioms,
 
-    #[token(":safety-constraints")]
+    #[token(":safety-constraints", ignore(ascii_case))]
     SafetyConstraints,
 
-    #[token(":expression-evaluation")]
+    #[token(":expression-evaluation", ignore(ascii_case))]
     ExpressionEvaluation,
 
-    #[token(":fluents")]
+    #[token(":fluents", ignore(ascii_case))]
     Fluents,
 
-    #[token(":open-world")]
+    #[token(":open-world", ignore(ascii_case))]
     OpenWorld,
 
-    #[token(":true-negation")]
+    #[token(":true-negation", ignore(ascii_case))]
     TrueNegation,
 
-    #[token(":adl")]
+    #[token(":adl", ignore(ascii_case))]
     Adl,
 
-    #[token(":ucpop")]
+    #[token(":ucpop", ignore(ascii_case))]
     Ucpop,
 
     // PDDL 2.1
-    #[token(":numeric-fluents")]
+    #[token(":numeric-fluents", ignore(ascii_case))]
     NumericFluents,
 
-    #[token(":durative-actions")]
+    #[token(":durative-actions", ignore(ascii_case))]
     DurativeActions,
 
-    #[token(":durative-inequalities")]
+    #[regex(r":durative-inequalities", ignore(ascii_case))]
+    #[regex(r":duration-inequalities", ignore(ascii_case))]
     DurativeInequalities,
 
-    #[token(":continuous-effects")]
+    #[token(":continuous-effects", ignore(ascii_case))]
     ContinuousEffects,
 
-    #[token(":negative-preconditions")]
+    #[token(":negative-preconditions", ignore(ascii_case))]
     NegativePreconditions,
 
     // PDDL 2.2
-    #[token(":derived-predicates")]
+    #[token(":derived-predicates", ignore(ascii_case))]
     DerivedPredicates,
 
-    #[token(":timed-initial-literals")]
+    #[token(":timed-initial-literals", ignore(ascii_case))]
     TimedInitialLiterals,
 
     // PDDL 3
-    #[token(":preferences")]
+    #[token(":preferences", ignore(ascii_case))]
     Preferences,
 
-    #[token(":constraints")]
+    #[token(":constraints", ignore(ascii_case))]
     Constraints,
 
     // PDDL 3.1
-    #[token(":action-costs")]
+    #[token(":action-costs", ignore(ascii_case))]
     ActionCosts,
 
-    #[token(":goal-utilities")]
+    #[token(":goal-utilities", ignore(ascii_case))]
     GoalUtilities,
 
     // PDDL+
-    #[token(":time")]
+    #[token(":time", ignore(ascii_case))]
     Time,
 
     // PDDL Identifier
@@ -186,10 +228,18 @@ pub enum Token {
     #[regex(r";.*", logos::skip)]
     Comment,
 
+    // Packages
+    #[regex(r#"\(\s*in-package\s+("[^"]*"|[^)\s]*)\)"#, logos::skip)]
+    Package,
+
     // Whitespace
-    #[error]
-    #[regex(r"[ \t\n\f]+", logos::skip)]
+    #[regex(r"[ \t\n\f\r]+", logos::skip)]
     Whitespace,
+
+    // Error
+    #[error]
+    #[regex(r"", logos::skip)]
+    Error,
 }
 
 pub struct TokenStream<'a> {
@@ -224,9 +274,25 @@ impl<'a> TokenStream<'a> {
         iter.next().map(|(t, span)| (t, &self.lexer.source()[span]))
     }
 
+    pub fn peek_n(&self, n: usize) -> Option<Vec<(Token, String)>> {
+        let mut iter = self.lexer.clone().spanned();
+        let mut tokens = Vec::new();
+        for _ in 0..n {
+            match iter.next() {
+                Some((t, span)) => tokens.push((t, self.lexer.source()[span].to_string())),
+                None => return None,
+            }
+        }
+        Some(tokens)
+    }
+
     pub fn advance(mut self) -> Self {
         self.lexer.next();
         self
+    }
+
+    pub fn span(&self) -> Range<usize> {
+        self.lexer.span()
     }
 }
 
@@ -234,7 +300,11 @@ impl<'a> nom::Parser<TokenStream<'a>, &'a str, ParserError> for Token {
     fn parse(&mut self, input: TokenStream<'a>) -> nom::IResult<TokenStream<'a>, &'a str, ParserError> {
         match input.peek() {
             Some((t, s)) if t == *self => Ok((input.advance(), s)),
-            _ => Err(nom::Err::Error(ParserError::ExpectedToken(self.clone()))),
+            _ => Err(nom::Err::Error(ParserError::ExpectedToken(
+                self.clone(),
+                input.span(),
+                input.peek_n(10),
+            ))),
         }
     }
 }
