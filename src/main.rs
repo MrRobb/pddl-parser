@@ -11,8 +11,7 @@ fn get_domain_files(folder: &Path) -> Vec<PathBuf> {
     let domain_file = folder.join("domain.pddl");
     if domain_file.exists() {
         vec![domain_file]
-    }
-    else {
+    } else {
         let folder = folder.join("domains");
         folder
             .read_dir()
@@ -41,9 +40,9 @@ fn main() {
     let server_addr = format!("0.0.0.0:{}", puffin_http::DEFAULT_PORT);
     eprintln!("Serving demo profile data on {server_addr}");
 
-    let _puffin_server = puffin_http::Server::new(&server_addr).unwrap();
+    // let _puffin_server = puffin_http::Server::new(&server_addr).unwrap();
 
-    puffin::set_scopes_on(true);
+    // puffin::set_scopes_on(true);
 
     // Create temporary directory
     // let tempdir = tempfile::tempdir().unwrap();
@@ -99,7 +98,10 @@ fn main() {
                 ParserError::ParseError(_)
                 | ParserError::IncompleteInput(_)
                 | ParserError::ExpectedIdentifier
-                | ParserError::ExpectedToken(_) => {
+                | ParserError::ExpectedInteger
+                | ParserError::ExpectedFloat
+                | ParserError::ExpectedToken(_, _, _) => {
+                    println!("[BAD] Parsing {path:?} (error: {e:?}))");
                     bad += 1;
                 },
             },
