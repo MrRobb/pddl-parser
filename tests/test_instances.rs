@@ -6,7 +6,7 @@ mod tests {
 
     use git2::build::{CheckoutBuilder, RepoBuilder};
     use git2::{FetchOptions, RemoteCallbacks};
-    use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
+    use indicatif::{ProgressBar, ProgressStyle};
     use pddl_parser::domain::Domain;
     use pddl_parser::error::ParserError;
     use url::Url;
@@ -57,8 +57,7 @@ mod tests {
         let domain_file = folder.join("domain.pddl");
         if domain_file.exists() {
             vec![domain_file]
-        }
-        else {
+        } else {
             let folder = folder.join("domains");
             folder
                 .read_dir()
@@ -125,10 +124,7 @@ mod tests {
                 Ok(_) => (),
                 Err(e) => match e {
                     ParserError::UnsupportedRequirement(_) => {},
-                    ParserError::ExpectedIdentifier => panic!("Expected identifier"),
-                    ParserError::ExpectedToken(t) => panic!("Expected token: {t:?}"),
-                    ParserError::ParseError(e) => panic!("Parse error with error: {e:?}"),
-                    ParserError::IncompleteInput(e) => panic!("Incomplete input with error: {e:?}"),
+                    _ => panic!("Error with error: {e:?}"),
                 },
             }
         }
