@@ -22,7 +22,7 @@ pub enum ParserError {
     ExpectedIdentifier,
 
     #[error("Expected token: {0:?}")]
-    ExpectedToken(Token, Range<usize>),
+    ExpectedToken(Token, Range<usize>, Option<Vec<(Token, String)>>),
 
     #[error("Expected float")]
     ExpectedFloat,
@@ -53,7 +53,9 @@ impl From<nom::Err<ParserError>> for ParserError {
                 ParserError::IncompleteInput(e) => ParserError::IncompleteInput(e),
                 ParserError::UnsupportedRequirement(e) => ParserError::UnsupportedRequirement(e),
                 ParserError::ExpectedIdentifier => ParserError::ExpectedIdentifier,
-                ParserError::ExpectedToken(token, span) => ParserError::ExpectedToken(token, span),
+                ParserError::ExpectedToken(token, span, next_tokens) => {
+                    ParserError::ExpectedToken(token, span, next_tokens)
+                },
                 ParserError::ExpectedFloat => ParserError::ExpectedFloat,
                 ParserError::ExpectedInteger => ParserError::ExpectedInteger,
             },
