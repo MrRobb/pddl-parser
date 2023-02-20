@@ -4,7 +4,7 @@ use nom::sequence::{pair, preceded};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
-use super::r#type::Type;
+use super::typing::Type;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::var;

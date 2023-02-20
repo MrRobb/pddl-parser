@@ -7,7 +7,7 @@ use super::action::Action;
 use super::constant::Constant;
 use super::predicate::Predicate;
 use super::requirement::Requirement;
-use super::r#type::Type;
+use super::typing::Type;
 use super::typed_predicate::TypedPredicate;
 use super::typedef::TypeDef;
 use crate::error::ParserError;
