@@ -73,62 +73,76 @@ impl Domain {
         output.push_str(&format!("(define (domain {})\n", self.name));
 
         // Requirements
-        output.push_str(&format!(
-            "(:requirements {})\n",
-            self.requirements
-                .iter()
-                .map(Requirement::to_pddl)
-                .collect::<Vec<String>>()
-                .join(" ")
-        ));
+        if !self.requirements.is_empty() {
+            output.push_str(&format!(
+                "(:requirements {})\n",
+                self.requirements
+                    .iter()
+                    .map(Requirement::to_pddl)
+                    .collect::<Vec<String>>()
+                    .join(" ")
+            ));
+        }
 
         // Types
-        output.push_str(&format!(
-            "(:types \n{}\n)\n",
-            self.types
-                .iter()
-                .map(TypeDef::to_pddl)
-                .collect::<Vec<String>>()
-                .join(" ")
-        ));
+        if !self.types.is_empty() {
+            output.push_str(&format!(
+                "(:types \n{}\n)\n",
+                self.types
+                    .iter()
+                    .map(TypeDef::to_pddl)
+                    .collect::<Vec<String>>()
+                    .join("\n")
+            ));
+        }
 
         // Constants
-        output.push_str(&format!(
-            "(:constants \n{}\n)\n",
-            self.constants
-                .iter()
-                .map(Constant::to_pddl)
-                .collect::<Vec<String>>()
-                .join("\n")
-        ));
+        if !self.constants.is_empty() {
+            output.push_str(&format!(
+                "(:constants \n{}\n)\n",
+                self.constants
+                    .iter()
+                    .map(Constant::to_pddl)
+                    .collect::<Vec<String>>()
+                    .join("\n")
+            ));
+        }
 
         // Predicates
-        output.push_str(&format!(
-            "(:predicates \n{}\n)\n",
-            self.predicates
-                .iter()
-                .map(TypedPredicate::to_pddl)
-                .collect::<Vec<String>>()
-                .join(" ")
-        ));
+        if !self.predicates.is_empty() {
+            output.push_str(&format!(
+                "(:predicates \n{}\n)\n",
+                self.predicates
+                    .iter()
+                    .map(TypedPredicate::to_pddl)
+                    .collect::<Vec<String>>()
+                    .join("\n")
+            ));
+        }
 
         // Functions
-        output.push_str(&format!(
-            "\t:functions {}\n",
-            self.functions
-                .iter()
-                .map(TypedPredicate::to_pddl)
-                .collect::<Vec<String>>()
-                .join(" ")
-        ));
-        output.push_str(&format!(
-            "\t:actions {}\n",
-            self.actions
-                .iter()
-                .map(Action::to_pddl)
-                .collect::<Vec<String>>()
-                .join(" ")
-        ));
+        if !self.functions.is_empty() {
+            output.push_str(&format!(
+                "(:functions \n{}\n)\n",
+                self.functions
+                    .iter()
+                    .map(TypedPredicate::to_pddl)
+                    .collect::<Vec<String>>()
+                    .join("\n")
+            ));
+        }
+
+        // Actions
+        if !self.actions.is_empty() {
+            output.push_str(
+                &self
+                    .actions
+                    .iter()
+                    .map(Action::to_pddl)
+                    .collect::<Vec<String>>()
+                    .join("\n\n"),
+            );
+        }
 
         // End
         output.push_str(")\n");

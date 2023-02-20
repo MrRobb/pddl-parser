@@ -28,6 +28,24 @@ mod tests {
     use crate::problem::{Object, Problem};
 
     #[test]
+    fn test_domain_to_pddl() {
+        let domain_example = include_str!("../tests/domain.pddl");
+        let domain = Domain::parse(domain_example.into()).unwrap();
+        eprintln!("{}", domain.to_pddl());
+        let redomain = Domain::parse(domain.to_pddl().as_str().into()).unwrap();
+        assert_eq!(domain, redomain);
+    }
+
+    #[test]
+    fn test_problem_to_pddl() {
+        let problem_example = include_str!("../tests/problem.pddl");
+        let problem = Problem::parse(problem_example.into()).unwrap();
+        eprintln!("{}", problem.to_pddl());
+        let reproblem = Problem::parse(problem.to_pddl().as_str().into()).unwrap();
+        assert_eq!(problem, reproblem);
+    }
+
+    #[test]
     fn test_plan() {
         let plan_example = include_str!("../tests/plan.txt");
         assert_eq!(
@@ -140,11 +158,11 @@ mod tests {
                         name: "on".into(),
                         parameters: vec![
                             TypedParameter {
-                                name: "obj".into(),
+                                name: "?obj".into(),
                                 type_: "locatable".into(),
                             },
                             TypedParameter {
-                                name: "loc".into(),
+                                name: "?loc".into(),
                                 type_: "location".into(),
                             },
                         ],
@@ -153,11 +171,11 @@ mod tests {
                         name: "holding".into(),
                         parameters: vec![
                             TypedParameter {
-                                name: "arm".into(),
+                                name: "?arm".into(),
                                 type_: "locatable".into(),
                             },
                             TypedParameter {
-                                name: "cupcake".into(),
+                                name: "?cupcake".into(),
                                 type_: "locatable".into(),
                             },
                         ],
@@ -170,11 +188,11 @@ mod tests {
                         name: "path".into(),
                         parameters: vec![
                             TypedParameter {
-                                name: "location1".into(),
+                                name: "?location1".into(),
                                 type_: "location".into(),
                             },
                             TypedParameter {
-                                name: "location2".into(),
+                                name: "?location2".into(),
                                 type_: "location".into(),
                             },
                         ],
@@ -186,26 +204,26 @@ mod tests {
                         name: "pick-up".into(),
                         parameters: vec![
                             TypedParameter {
-                                name: "arm".into(),
+                                name: "?arm".into(),
                                 type_: "bot".into(),
                             },
                             TypedParameter {
-                                name: "cupcake".into(),
+                                name: "?cupcake".into(),
                                 type_: "locatable".into(),
                             },
                             TypedParameter {
-                                name: "loc".into(),
+                                name: "?loc".into(),
                                 type_: "location".into(),
                             },
                         ],
                         precondition: Some(Expression::And(vec![
                             Expression::Atom {
                                 name: "on".into(),
-                                parameters: vec!["arm".into(), "loc".into()],
+                                parameters: vec!["?arm".into(), "?loc".into()],
                             },
                             Expression::Atom {
                                 name: "on".into(),
-                                parameters: vec!["cupcake".into(), "loc".into(),],
+                                parameters: vec!["?cupcake".into(), "?loc".into(),],
                             },
                             Expression::Atom {
                                 name: "arm-empty".into(),
@@ -215,11 +233,11 @@ mod tests {
                         effect: Expression::And(vec![
                             Expression::Not(Box::new(Expression::Atom {
                                 name: "on".into(),
-                                parameters: vec!["cupcake".into(), "loc".into()],
+                                parameters: vec!["?cupcake".into(), "?loc".into()],
                             })),
                             Expression::Atom {
                                 name: "holding".into(),
-                                parameters: vec!["arm".into(), "cupcake".into()],
+                                parameters: vec!["?arm".into(), "?cupcake".into()],
                             },
                             Expression::Not(Box::new(Expression::Atom {
                                 name: "arm-empty".into(),
@@ -231,32 +249,32 @@ mod tests {
                         name: "drop".into(),
                         parameters: vec![
                             TypedParameter {
-                                name: "arm".into(),
+                                name: "?arm".into(),
                                 type_: "bot".into(),
                             },
                             TypedParameter {
-                                name: "cupcake".into(),
+                                name: "?cupcake".into(),
                                 type_: "locatable".into(),
                             },
                             TypedParameter {
-                                name: "loc".into(),
+                                name: "?loc".into(),
                                 type_: "location".into(),
                             },
                         ],
                         precondition: Some(Expression::And(vec![
                             Expression::Atom {
                                 name: "on".into(),
-                                parameters: vec!["arm".into(), "loc".into(),],
+                                parameters: vec!["?arm".into(), "?loc".into(),],
                             },
                             Expression::Atom {
                                 name: "holding".into(),
-                                parameters: vec!["arm".into(), "cupcake".into(),],
+                                parameters: vec!["?arm".into(), "?cupcake".into(),],
                             },
                         ])),
                         effect: Expression::And(vec![
                             Expression::Atom {
                                 name: "on".into(),
-                                parameters: vec!["cupcake".into(), "loc".into(),],
+                                parameters: vec!["?cupcake".into(), "?loc".into(),],
                             },
                             Expression::Atom {
                                 name: "arm-empty".into(),
@@ -264,7 +282,7 @@ mod tests {
                             },
                             Expression::Not(Box::new(Expression::Atom {
                                 name: "holding".into(),
-                                parameters: vec!["arm".into(), "cupcake".into(),],
+                                parameters: vec!["?arm".into(), "?cupcake".into(),],
                             })),
                         ])
                     },
@@ -272,36 +290,36 @@ mod tests {
                         name: "move".into(),
                         parameters: vec![
                             TypedParameter {
-                                name: "arm".into(),
+                                name: "?arm".into(),
                                 type_: "bot".into(),
                             },
                             TypedParameter {
-                                name: "from".into(),
+                                name: "?from".into(),
                                 type_: "location".into(),
                             },
                             TypedParameter {
-                                name: "to".into(),
+                                name: "?to".into(),
                                 type_: "location".into(),
                             },
                         ],
                         precondition: Some(Expression::And(vec![
                             Expression::Atom {
                                 name: "on".into(),
-                                parameters: vec!["arm".into(), "from".into(),],
+                                parameters: vec!["?arm".into(), "?from".into(),],
                             },
                             Expression::Atom {
                                 name: "path".into(),
-                                parameters: vec!["from".into(), "to".into(),],
+                                parameters: vec!["?from".into(), "?to".into(),],
                             },
                         ])),
                         effect: Expression::And(vec![
                             Expression::Not(Box::new(Expression::Atom {
                                 name: "on".into(),
-                                parameters: vec!["arm".into(), "from".into(),],
+                                parameters: vec!["?arm".into(), "?from".into(),],
                             })),
                             Expression::Atom {
                                 name: "on".into(),
-                                parameters: vec!["arm".into(), "to".into(),],
+                                parameters: vec!["?arm".into(), "?to".into(),],
                             },
                         ])
                     }

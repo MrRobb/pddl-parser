@@ -57,20 +57,29 @@ impl Action {
 
     pub fn to_pddl(&self) -> String {
         let mut pddl = String::new();
+
+        // Action name
         pddl.push_str(&format!("(:action {}\n", self.name));
+
+        // Parameters
         pddl.push_str(&format!(
-            "\t:parameters ({})\n",
+            ":parameters ({})\n",
             self.parameters
                 .iter()
                 .map(TypedParameter::to_pddl)
                 .collect::<Vec<_>>()
                 .join(" ")
         ));
+
+        // Precondition
         if let Some(precondition) = &self.precondition {
-            pddl.push_str(&format!("\t:precondition {}\n", precondition.to_pddl()));
+            pddl.push_str(&format!(":precondition {}\n", precondition.to_pddl()));
         }
-        pddl.push_str(&format!("\t:effect {}\n", self.effect.to_pddl()));
-        pddl.push_str(")\n");
+
+        // Effect
+        pddl.push_str(&format!(":effect \n{}\n", self.effect.to_pddl()));
+
+        pddl.push(')');
         pddl
     }
 }

@@ -36,6 +36,6 @@ impl TypedParameter {
     }
 
     pub fn to_pddl(&self) -> String {
-        format!("({} - {})", self.name, self.type_.to_pddl())
+        format!("{} - {}", self.name, self.type_.to_pddl())
     }
 }

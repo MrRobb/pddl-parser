@@ -8,6 +8,6 @@ pub struct TypeDef {
 
 impl TypeDef {
     pub fn to_pddl(&self) -> String {
-        format!("{} - {})", self.name, self.parent)
+        format!("{} - {}", self.name, self.parent)
     }
 }

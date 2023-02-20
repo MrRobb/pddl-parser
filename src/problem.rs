@@ -21,7 +21,7 @@ pub struct Object {
 
 impl Object {
     pub fn to_pddl(&self) -> String {
-        format!("({} - {})", self.name, self.type_)
+        format!("{} - {}", self.name, self.type_)
     }
 }
 
@@ -150,6 +150,9 @@ impl Problem {
 
         // Goal
         pddl.push_str(&format!("(:goal\n{}\n)\n", &self.goal.to_pddl()));
+
+        // End
+        pddl.push(')');
 
         pddl
     }

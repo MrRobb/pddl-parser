@@ -217,7 +217,7 @@ pub enum Token {
     Id(String),
 
     // PDDL Variable
-    #[regex(r"\?[a-zA-Z][a-zA-Z0-9_\-]*", |lex| lex.slice()[1..].to_string())]
+    #[regex(r"\?[a-zA-Z][a-zA-Z0-9_\-]*", |lex| lex.slice().to_string())]
     Var(String),
 
     // Dash
