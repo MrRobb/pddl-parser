@@ -54,4 +54,23 @@ impl Action {
         log::debug!("END < parse_actions {:?}", output.span());
         Ok((output, actions))
     }
+
+    pub fn to_pddl(&self) -> String {
+        let mut pddl = String::new();
+        pddl.push_str(&format!("(:action {}\n", self.name));
+        pddl.push_str(&format!(
+            "\t:parameters ({})\n",
+            self.parameters
+                .iter()
+                .map(TypedParameter::to_pddl)
+                .collect::<Vec<_>>()
+                .join(" ")
+        ));
+        if let Some(precondition) = &self.precondition {
+            pddl.push_str(&format!("\t:precondition {}\n", precondition.to_pddl()));
+        }
+        pddl.push_str(&format!("\t:effect {}\n", self.effect.to_pddl()));
+        pddl.push_str(")\n");
+        pddl
+    }
 }

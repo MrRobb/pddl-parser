@@ -63,4 +63,11 @@ impl Type {
         log::debug!("END < parse_types {:?}", output.span());
         Ok((output, types))
     }
+
+    pub fn to_pddl(&self) -> String {
+        match self {
+            Type::Simple(s) => s.to_string(),
+            Type::Either(v) => format!("(either {})", v.join(" ")),
+        }
+    }
 }

@@ -26,7 +26,6 @@ pub struct Domain {
 
 impl Domain {
     pub fn parse(input: TokenStream) -> Result<Self, ParserError> {
-        puffin::profile_function!();
         let (_, domain) = delimited(
             Token::OpenParen,
             preceded(Token::Define, Domain::parse_domain),
@@ -65,5 +64,75 @@ impl Domain {
         log::debug!("END < parse_domain {:?}", output.span());
         // log::info!("Parsed domain: \n{domain:#?}");
         Ok((output, domain))
+    }
+
+    pub fn to_pddl(&self) -> String {
+        let mut output = String::new();
+
+        // Name
+        output.push_str(&format!("(define (domain {})\n", self.name));
+
+        // Requirements
+        output.push_str(&format!(
+            "(:requirements {})\n",
+            self.requirements
+                .iter()
+                .map(Requirement::to_pddl)
+                .collect::<Vec<String>>()
+                .join(" ")
+        ));
+
+        // Types
+        output.push_str(&format!(
+            "(:types \n{}\n)\n",
+            self.types
+                .iter()
+                .map(TypeDef::to_pddl)
+                .collect::<Vec<String>>()
+                .join(" ")
+        ));
+
+        // Constants
+        output.push_str(&format!(
+            "(:constants \n{}\n)\n",
+            self.constants
+                .iter()
+                .map(Constant::to_pddl)
+                .collect::<Vec<String>>()
+                .join("\n")
+        ));
+
+        // Predicates
+        output.push_str(&format!(
+            "(:predicates \n{}\n)\n",
+            self.predicates
+                .iter()
+                .map(TypedPredicate::to_pddl)
+                .collect::<Vec<String>>()
+                .join(" ")
+        ));
+
+        // Functions
+        output.push_str(&format!(
+            "\t:functions {}\n",
+            self.functions
+                .iter()
+                .map(TypedPredicate::to_pddl)
+                .collect::<Vec<String>>()
+                .join(" ")
+        ));
+        output.push_str(&format!(
+            "\t:actions {}\n",
+            self.actions
+                .iter()
+                .map(Action::to_pddl)
+                .collect::<Vec<String>>()
+                .join(" ")
+        ));
+
+        // End
+        output.push_str(")\n");
+
+        output
     }
 }

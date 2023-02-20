@@ -38,4 +38,8 @@ impl Constant {
         log::debug!("END < parse_constants {:?}", output.span());
         Ok((output, constants))
     }
+
+    pub fn to_pddl(&self) -> String {
+        format!("({} - {})", self.name, self.type_.to_pddl())
+    }
 }

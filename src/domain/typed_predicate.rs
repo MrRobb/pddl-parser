@@ -61,4 +61,16 @@ impl TypedPredicate {
         log::debug!("END < parse_predicates {:?}", output.span());
         Ok((output, predicates))
     }
+
+    pub fn to_pddl(&self) -> String {
+        format!(
+            "({} {})",
+            self.name,
+            self.parameters
+                .iter()
+                .map(TypedParameter::to_pddl)
+                .collect::<Vec<_>>()
+                .join(" ")
+        )
+    }
 }

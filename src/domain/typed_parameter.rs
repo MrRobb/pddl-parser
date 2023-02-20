@@ -34,4 +34,8 @@ impl TypedParameter {
         log::debug!("END < parse_typed_parameters {:?}", output.span());
         Ok((output, params))
     }
+
+    pub fn to_pddl(&self) -> String {
+        format!("({} - {})", self.name, self.type_.to_pddl())
+    }
 }

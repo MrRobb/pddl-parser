@@ -5,3 +5,9 @@ pub struct TypeDef {
     pub name: String,
     pub parent: String,
 }
+
+impl TypeDef {
+    pub fn to_pddl(&self) -> String {
+        format!("{} - {})", self.name, self.parent)
+    }
+}

@@ -134,4 +134,52 @@ impl Requirement {
         log::debug!("END < parse_requirements {:?}", output.span());
         Ok((output, requirements.unwrap_or_default()))
     }
+
+    pub fn to_pddl(&self) -> String {
+        match self {
+            // PDDL 1
+            Requirement::Strips => ":strips".to_string(),
+            Requirement::Typing => ":typing".to_string(),
+            Requirement::DisjunctivePreconditions => ":disjunctive-preconditions".to_string(),
+            Requirement::Equality => ":equality".to_string(),
+            Requirement::ExistentialPreconditions => ":existential-preconditions".to_string(),
+            Requirement::UniversalPreconditions => ":universal-preconditions".to_string(),
+            Requirement::QuantifiedPreconditions => ":quantified-preconditions".to_string(),
+            Requirement::ConditionalEffects => ":conditional-effects".to_string(),
+            Requirement::ActionExpansions => ":action-expansions".to_string(),
+            Requirement::ForeachExpansions => ":foreach-expansions".to_string(),
+            Requirement::DagExpansions => ":dag-expansions".to_string(),
+            Requirement::DomainAxioms => ":domain-axioms".to_string(),
+            Requirement::SubgoalsThroughAxioms => ":subgoals-through-axioms".to_string(),
+            Requirement::SafetyConstraints => ":safety-constraints".to_string(),
+            Requirement::ExpressionEvaluation => ":expression-evaluation".to_string(),
+            Requirement::Fluents => ":fluents".to_string(),
+            Requirement::OpenWorld => ":open-world".to_string(),
+            Requirement::TrueNegation => ":true-negation".to_string(),
+            Requirement::Adl => ":adl".to_string(),
+            Requirement::Ucpop => ":ucpop".to_string(),
+
+            // PDDL 2.1
+            Requirement::NumericFluents => ":numeric-fluents".to_string(),
+            Requirement::DurativeActions => ":durative-actions".to_string(),
+            Requirement::DurativeInequalities => ":durative-inequalities".to_string(),
+            Requirement::ContinuousEffects => ":continuous-effects".to_string(),
+            Requirement::NegativePreconditions => ":negative-preconditions".to_string(),
+
+            // PDDL 2.2
+            Requirement::DerivedPredicates => ":derived-predicates".to_string(),
+            Requirement::TimedInitialLiterals => ":timed-initial-literals".to_string(),
+
+            // PDDL 3
+            Requirement::Preferences => ":preferences".to_string(),
+            Requirement::Constraints => ":constraints".to_string(),
+
+            // PDDL 3.1
+            Requirement::ActionCosts => ":action-costs".to_string(),
+            Requirement::GoalUtilities => ":goal-utilities".to_string(),
+
+            // PDDL+
+            Requirement::Time => ":time".to_string(),
+        }
+    }
 }
