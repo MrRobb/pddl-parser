@@ -5,7 +5,6 @@ use serde::{Deserialize, Serialize};
 
 use super::action::Action;
 use super::constant::Constant;
-use super::predicate::Predicate;
 use super::requirement::Requirement;
 use super::typed_predicate::TypedPredicate;
 use super::typedef::TypeDef;
@@ -50,7 +49,7 @@ impl Domain {
             Requirement::parse_requirements,
             opt(Type::parse_types),
             opt(Constant::parse_constants),
-            Predicate::parse_predicates,
+            TypedPredicate::parse_predicates,
             TypedPredicate::parse_functions,
             Action::parse_actions,
         ))(input)?;

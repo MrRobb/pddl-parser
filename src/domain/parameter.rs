@@ -30,4 +30,8 @@ impl Parameter {
         log::debug!("END < parse_parameters {:?}", output.span());
         Ok((output, params))
     }
+
+    pub fn to_pddl(&self) -> String {
+        self.0.clone()
+    }
 }

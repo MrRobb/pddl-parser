@@ -1,11 +1,11 @@
 use std::string::ToString;
 
-use nom::multi::many0;
-use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
+use nom::sequence::{delimited, preceded, separated_pair, tuple};
 use nom::IResult;
+use nom::{multi::many0, sequence::pair};
 use serde::{Deserialize, Serialize};
 
-use crate::domain::expression::Expression;
+use crate::domain::{expression::Expression, parameter::Parameter, predicate::Predicate};
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
@@ -15,13 +15,6 @@ pub struct Object {
     pub name: String,
     #[serde(rename = "type")]
     pub type_: String,
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
-pub struct Predicate {
-    pub name: String,
-    #[serde(default)]
-    pub args: Vec<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
@@ -98,25 +91,25 @@ impl Problem {
     }
 
     fn parse_init(input: TokenStream) -> IResult<TokenStream, Vec<Predicate>, ParserError> {
+        log::debug!("BEGIN > parse_init {:?}", input.span());
         let (output, init) = delimited(
             Token::OpenParen,
             preceded(
                 Token::Init,
                 many0(delimited(
                     Token::OpenParen,
-                    pair(id, Problem::parse_parameters),
+                    pair(id, Parameter::parse_parameters),
                     Token::CloseParen,
                 )),
             ),
             Token::CloseParen,
         )(input)?;
-        let init = init.into_iter().map(|(name, args)| Predicate { name, args }).collect();
+        let init = init
+            .into_iter()
+            .map(|(name, parameters)| Predicate { name, parameters })
+            .collect();
+        log::debug!("END < parse_init {:?}", output.span());
         Ok((output, init))
-    }
-
-    fn parse_parameters(input: TokenStream) -> IResult<TokenStream, Vec<String>, ParserError> {
-        let (output, parameters) = many0(id)(input)?;
-        Ok((output, parameters))
     }
 
     fn parse_goal(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
@@ -126,5 +119,32 @@ impl Problem {
             Token::CloseParen,
         )(input)?;
         Ok((output, goal))
+    }
+
+    pub fn to_pddl(&self) -> String {
+        let mut pddl = String::new();
+
+        // Name and domain
+        pddl.push_str(&format!("(define (problem {})\n", self.name));
+        pddl.push_str(&format!("(:domain {})\n", self.domain));
+
+        // Objects
+        pddl.push_str("(:objects\n");
+        for object in &self.objects {
+            pddl.push_str(&format!("{} - {}\n", object.name, object.type_));
+        }
+        pddl.push_str(")\n");
+
+        // Init
+        pddl.push_str("(:init\n");
+        for predicate in &self.init {
+            pddl.push_str(&predicate.to_pddl());
+        }
+        pddl.push_str(")\n");
+
+        // Goal
+        pddl.push_str(&format!("(:goal {})\n", &self.goal.to_pddl()));
+
+        pddl
     }
 }

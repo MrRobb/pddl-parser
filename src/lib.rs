@@ -18,13 +18,14 @@ pub mod tokens;
 mod tests {
     use crate::domain::domain::Domain;
     use crate::domain::expression::Expression;
+    use crate::domain::predicate::Predicate;
     use crate::domain::requirement::Requirement;
     use crate::domain::typed_parameter::TypedParameter;
     use crate::domain::typed_predicate::TypedPredicate;
     use crate::domain::typedef::TypeDef;
     use crate::domain::{self};
     use crate::plan::{Action, Plan};
-    use crate::problem::{Object, Predicate, Problem};
+    use crate::problem::{Object, Problem};
 
     #[test]
     fn test_plan() {
@@ -77,19 +78,19 @@ mod tests {
                 init: vec![
                     Predicate {
                         name: "on".into(),
-                        args: vec!["arm".into(), "table".into(),],
+                        parameters: vec!["arm".into(), "table".into(),],
                     },
                     Predicate {
                         name: "on".into(),
-                        args: vec!["cupcake".into(), "table".into(),],
+                        parameters: vec!["cupcake".into(), "table".into(),],
                     },
                     Predicate {
                         name: "arm-empty".into(),
-                        args: vec![],
+                        parameters: vec![],
                     },
                     Predicate {
                         name: "path".into(),
-                        args: vec!["table".into(), "plate".into(),],
+                        parameters: vec!["table".into(), "plate".into(),],
                     }
                 ],
                 goal: Expression::Atom {

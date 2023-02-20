@@ -4,8 +4,6 @@ use nom::IResult;
 use serde::{Deserialize, Serialize};
 
 use super::parameter::Parameter;
-use super::typed_predicate::TypedPredicate;
-use crate::domain::typed_parameter::TypedParameter;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
@@ -18,7 +16,7 @@ pub struct Predicate {
 }
 
 impl Predicate {
-    pub fn parse_predicates(input: TokenStream) -> IResult<TokenStream, Vec<TypedPredicate>, ParserError> {
+    pub fn parse_predicates(input: TokenStream) -> IResult<TokenStream, Vec<Predicate>, ParserError> {
         log::debug!("BEGIN > parse_predicates {:?}", input.span());
         let (output, predicates) = delimited(
             Token::OpenParen,
@@ -26,7 +24,7 @@ impl Predicate {
                 Token::Predicates,
                 many0(delimited(
                     Token::OpenParen,
-                    pair(id, TypedParameter::parse_typed_parameters),
+                    pair(id, Parameter::parse_parameters),
                     Token::CloseParen,
                 )),
             ),
@@ -34,9 +32,21 @@ impl Predicate {
         )(input)?;
         let predicates = predicates
             .into_iter()
-            .map(|(name, parameters)| TypedPredicate { name, parameters })
+            .map(|(name, parameters)| Predicate { name, parameters })
             .collect();
         log::debug!("END < parse_predicates {:?}", output.span());
         Ok((output, predicates))
+    }
+
+    pub fn to_pddl(&self) -> String {
+        format!(
+            "({} {})",
+            self.name,
+            self.parameters
+                .iter()
+                .map(Parameter::to_pddl)
+                .collect::<Vec<_>>()
+                .join(" ")
+        )
     }
 }

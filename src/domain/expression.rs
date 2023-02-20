@@ -58,6 +58,50 @@ impl Expression {
         Ok((output, expression))
     }
 
+    pub fn to_pddl(&self) -> String {
+        match self {
+            Expression::Atom { name, parameters } => format!(
+                "({} {})",
+                name,
+                parameters.iter().map(Parameter::to_pddl).collect::<Vec<_>>().join(" ")
+            ),
+            Expression::And(expressions) => format!(
+                "(and {})",
+                expressions
+                    .iter()
+                    .map(Expression::to_pddl)
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            ),
+            Expression::Not(expression) => format!("(not {})", expression.to_pddl()),
+            Expression::Assign(exp1, exp2) => format!("(assign {} {})", exp1.to_pddl(), exp2.to_pddl()),
+            Expression::Increase(exp1, exp2) => {
+                format!("(increase {} {})", exp1.to_pddl(), exp2.to_pddl())
+            },
+            Expression::Decrease(exp1, exp2) => {
+                format!("(decrease {} {})", exp1.to_pddl(), exp2.to_pddl())
+            },
+            Expression::ScaleUp(exp1, exp2) => {
+                format!("(scale-up {} {})", exp1.to_pddl(), exp2.to_pddl())
+            },
+            Expression::ScaleDown(exp1, exp2) => {
+                format!("(scale-down {} {})", exp1.to_pddl(), exp2.to_pddl())
+            },
+            Expression::BinaryOp(op, exp1, exp2) => format!(
+                "({} {} {})",
+                match op {
+                    BinaryOp::Add => "+",
+                    BinaryOp::Subtract => "-",
+                    BinaryOp::Multiply => "*",
+                    BinaryOp::Divide => "/",
+                },
+                exp1.to_pddl(),
+                exp2.to_pddl()
+            ),
+            Expression::Number(n) => n.to_string(),
+        }
+    }
+
     fn parse_and(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
         log::debug!("BEGIN > parse_and {:?}", input.span());
         let (output, expressions) = delimited(
