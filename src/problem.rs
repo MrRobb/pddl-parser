@@ -138,14 +138,13 @@ impl Problem {
         pddl.push_str(")\n");
 
         // Init
-        pddl.push_str("(:init\n");
-        for predicate in &self.init {
-            pddl.push_str(&predicate.to_pddl());
-        }
-        pddl.push_str(")\n");
+        pddl.push_str(&format!(
+            "(:init\n{})\n",
+            self.init.iter().map(Predicate::to_pddl).collect::<Vec<_>>().join("\n")
+        ));
 
         // Goal
-        pddl.push_str(&format!("(:goal {})\n", &self.goal.to_pddl()));
+        pddl.push_str(&format!("(:goal\n{})\n", &self.goal.to_pddl()));
 
         pddl
     }
