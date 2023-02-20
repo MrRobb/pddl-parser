@@ -5,6 +5,7 @@ use nom::sequence::{delimited, pair};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
+use crate::domain::parameter::Parameter;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
@@ -13,18 +14,18 @@ use crate::tokens::id;
 pub struct Action {
     pub name: String,
     #[serde(default)]
-    pub parameters: Vec<String>,
+    pub parameters: Vec<Parameter>,
 }
 
 impl Action {
-    pub const fn new(name: String, parameters: Vec<String>) -> Self {
+    pub const fn new(name: String, parameters: Vec<Parameter>) -> Self {
         Self { name, parameters }
     }
 
     fn parse(input: TokenStream) -> IResult<TokenStream, Self, ParserError> {
         let (output, (name, parameters)) = delimited(
             Token::OpenParen,
-            pair(Self::parse_name, Self::parse_parameters),
+            pair(Self::parse_name, Parameter::parse_parameters),
             Token::CloseParen,
         )(input)?;
         Ok((output, Self::new(name, parameters)))
@@ -33,15 +34,20 @@ impl Action {
     fn parse_name(input: TokenStream) -> IResult<TokenStream, String, ParserError> {
         id(input)
     }
-
-    fn parse_parameters(input: TokenStream) -> IResult<TokenStream, Vec<String>, ParserError> {
-        many0(id)(input)
-    }
 }
 
 impl Display for Action {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}({})", self.name, self.parameters.join(", "))
+        write!(
+            f,
+            "({} {})",
+            self.name,
+            self.parameters
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+                .join(" ")
+        )
     }
 }
 
