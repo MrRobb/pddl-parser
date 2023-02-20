@@ -7,11 +7,10 @@ use nom::sequence::{delimited, pair, preceded};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
+use super::typedef::TypeDef;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
-
-use super::typedef::TypeDef;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub enum Type {

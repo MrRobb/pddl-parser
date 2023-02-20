@@ -16,10 +16,13 @@ pub mod tokens;
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::{
-        self, domain::Domain, expression::Expression, requirement::Requirement, typed_parameter::TypedParameter,
-        typed_predicate::TypedPredicate, typedef::TypeDef,
-    };
+    use crate::domain::domain::Domain;
+    use crate::domain::expression::Expression;
+    use crate::domain::requirement::Requirement;
+    use crate::domain::typed_parameter::TypedParameter;
+    use crate::domain::typed_predicate::TypedPredicate;
+    use crate::domain::typedef::TypeDef;
+    use crate::domain::{self};
     use crate::plan::{Action, Plan};
     use crate::problem::{Object, Predicate, Problem};
 

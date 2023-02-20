@@ -4,11 +4,11 @@ use nom::sequence::{delimited, preceded, tuple};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
+use super::expression::Expression;
+use super::typed_parameter::TypedParameter;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
-
-use super::{expression::Expression, typed_parameter::TypedParameter};
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Action {

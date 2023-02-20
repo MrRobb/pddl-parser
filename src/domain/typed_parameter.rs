@@ -4,11 +4,10 @@ use nom::sequence::{pair, preceded};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
+use super::r#type::Type;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::var;
-
-use super::r#type::Type;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct TypedParameter {

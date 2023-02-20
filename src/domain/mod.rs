@@ -1,4 +1,3 @@
-
 pub mod action;
 pub mod constant;
 pub mod domain;

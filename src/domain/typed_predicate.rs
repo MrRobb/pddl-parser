@@ -4,9 +4,10 @@ use nom::sequence::{delimited, pair, preceded};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
+use crate::domain::typed_parameter::TypedParameter;
+use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
-use crate::{domain::typed_parameter::TypedParameter, error::ParserError};
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct TypedPredicate {

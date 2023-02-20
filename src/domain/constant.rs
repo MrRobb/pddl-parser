@@ -3,11 +3,10 @@ use nom::sequence::{delimited, preceded, separated_pair};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
+use super::r#type::Type;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
-
-use super::r#type::Type;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Constant {

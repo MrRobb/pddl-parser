@@ -11,7 +11,8 @@ fn get_domain_files(folder: &Path) -> Vec<PathBuf> {
     let domain_file = folder.join("domain.pddl");
     if domain_file.exists() {
         vec![domain_file]
-    } else {
+    }
+    else {
         let folder = folder.join("domains");
         folder
             .read_dir()

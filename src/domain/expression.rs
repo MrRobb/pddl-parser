@@ -5,11 +5,10 @@ use nom::sequence::{delimited, pair, preceded, tuple};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
+use super::parameter::Parameter;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::{id, integer};
-
-use super::parameter::Parameter;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub enum BinaryOp {

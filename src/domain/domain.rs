@@ -3,17 +3,16 @@ use nom::sequence::{delimited, preceded, tuple};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
-use super::{
-    action::Action, constant::Constant, predicate::Predicate, r#type::Type, requirement::Requirement,
-    typed_predicate::TypedPredicate,
-};
-use crate::tokens::id;
-use crate::{
-    error::ParserError,
-    lexer::{Token, TokenStream},
-};
-
+use super::action::Action;
+use super::constant::Constant;
+use super::predicate::Predicate;
+use super::requirement::Requirement;
+use super::r#type::Type;
+use super::typed_predicate::TypedPredicate;
 use super::typedef::TypeDef;
+use crate::error::ParserError;
+use crate::lexer::{Token, TokenStream};
+use crate::tokens::id;
 
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
 pub struct Domain {
