@@ -4,7 +4,7 @@ use nom::error::ParseError;
 use nom::Needed;
 use thiserror::Error;
 
-use crate::domain::Requirement;
+use crate::domain::requirement::Requirement;
 use crate::lexer::Token;
 
 #[derive(Error, Debug, PartialEq)]

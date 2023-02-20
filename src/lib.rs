@@ -3,7 +3,8 @@
     clippy::use_self,
     clippy::module_name_repetitions,
     clippy::must_use_candidate,
-    clippy::return_self_not_must_use
+    clippy::return_self_not_must_use,
+    clippy::module_inception
 )]
 
 pub mod domain;
@@ -15,7 +16,10 @@ pub mod tokens;
 
 #[cfg(test)]
 mod tests {
-    use crate::domain::{self, Expression, Requirement, TypeDef, TypedParameter};
+    use crate::domain::{
+        self, domain::Domain, expression::Expression, requirement::Requirement, typed_parameter::TypedParameter,
+        typed_predicate::TypedPredicate, typedef::TypeDef,
+    };
     use crate::plan::{Action, Plan};
     use crate::problem::{Object, Predicate, Problem};
 
@@ -100,8 +104,8 @@ mod tests {
         pretty_env_logger::init();
         let domain_example = include_str!("../tests/domain.pddl");
         assert_eq!(
-            domain::Domain::parse(domain_example.into()).unwrap(),
-            domain::Domain {
+            Domain::parse(domain_example.into()).unwrap(),
+            Domain {
                 name: "letseat".into(),
                 requirements: vec![Requirement::Typing],
                 types: vec![
@@ -128,44 +132,44 @@ mod tests {
                 ],
                 constants: vec![],
                 predicates: vec![
-                    domain::TypedPredicate {
+                    TypedPredicate {
                         name: "on".into(),
                         parameters: vec![
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "obj".into(),
                                 type_: "locatable".into(),
                             },
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "loc".into(),
                                 type_: "location".into(),
                             },
                         ],
                     },
-                    domain::TypedPredicate {
+                    TypedPredicate {
                         name: "holding".into(),
                         parameters: vec![
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "arm".into(),
                                 type_: "locatable".into(),
                             },
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "cupcake".into(),
                                 type_: "locatable".into(),
                             },
                         ],
                     },
-                    domain::TypedPredicate {
+                    TypedPredicate {
                         name: "arm-empty".into(),
                         parameters: vec![],
                     },
-                    domain::TypedPredicate {
+                    TypedPredicate {
                         name: "path".into(),
                         parameters: vec![
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "location1".into(),
                                 type_: "location".into(),
                             },
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "location2".into(),
                                 type_: "location".into(),
                             },
@@ -174,18 +178,18 @@ mod tests {
                 ],
                 functions: vec![],
                 actions: vec![
-                    domain::Action {
+                    domain::action::Action {
                         name: "pick-up".into(),
                         parameters: vec![
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "arm".into(),
                                 type_: "bot".into(),
                             },
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "cupcake".into(),
                                 type_: "locatable".into(),
                             },
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "loc".into(),
                                 type_: "location".into(),
                             },
@@ -219,18 +223,18 @@ mod tests {
                             })),
                         ])
                     },
-                    domain::Action {
+                    domain::action::Action {
                         name: "drop".into(),
                         parameters: vec![
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "arm".into(),
                                 type_: "bot".into(),
                             },
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "cupcake".into(),
                                 type_: "locatable".into(),
                             },
-                            domain::TypedParameter {
+                            TypedParameter {
                                 name: "loc".into(),
                                 type_: "location".into(),
                             },
@@ -260,7 +264,7 @@ mod tests {
                             })),
                         ])
                     },
-                    domain::Action {
+                    domain::action::Action {
                         name: "move".into(),
                         parameters: vec![
                             TypedParameter {

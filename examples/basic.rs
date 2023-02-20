@@ -1,4 +1,4 @@
-use pddl_parser::domain::Domain;
+use pddl_parser::domain::domain::Domain;
 
 fn main() {
     let domain_file = include_str!("../tests/domain.pddl");

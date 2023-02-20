@@ -4,15 +4,14 @@ use std::path::{Path, PathBuf};
 use std::result::Result;
 
 use indicatif::{ProgressBar, ProgressStyle};
-use pddl_parser::domain::Domain;
+use pddl_parser::domain::domain::Domain;
 use pddl_parser::error::ParserError;
 
 fn get_domain_files(folder: &Path) -> Vec<PathBuf> {
     let domain_file = folder.join("domain.pddl");
     if domain_file.exists() {
         vec![domain_file]
-    }
-    else {
+    } else {
         let folder = folder.join("domains");
         folder
             .read_dir()

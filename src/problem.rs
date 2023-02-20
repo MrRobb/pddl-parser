@@ -5,7 +5,7 @@ use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
 use nom::IResult;
 use serde::{Deserialize, Serialize};
 
-use crate::domain::Expression;
+use crate::domain::expression::Expression;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
