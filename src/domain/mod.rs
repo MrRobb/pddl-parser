@@ -5,7 +5,7 @@ pub mod expression;
 pub mod parameter;
 pub mod predicate;
 pub mod requirement;
-pub mod typing;
 pub mod typed_parameter;
 pub mod typed_predicate;
 pub mod typedef;
+pub mod typing;
