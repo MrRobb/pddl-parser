@@ -1,11 +1,13 @@
 use std::string::ToString;
 
-use nom::sequence::{delimited, preceded, separated_pair, tuple};
+use nom::multi::many0;
+use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
 use nom::IResult;
-use nom::{multi::many0, sequence::pair};
 use serde::{Deserialize, Serialize};
 
-use crate::domain::{expression::Expression, parameter::Parameter, predicate::Predicate};
+use crate::domain::expression::Expression;
+use crate::domain::parameter::Parameter;
+use crate::domain::predicate::Predicate;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
