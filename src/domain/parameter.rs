@@ -8,7 +8,7 @@ use crate::error::ParserError;
 use crate::lexer::TokenStream;
 use crate::tokens::{id, var};
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Parameter(String);
 
 impl From<String> for Parameter {

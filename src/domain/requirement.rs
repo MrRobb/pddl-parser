@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 
-#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Requirement {
     // PDDL 1
     Strips,
