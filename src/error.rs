@@ -1,3 +1,5 @@
+use std::ops::Range;
+
 use nom::error::ParseError;
 use nom::Needed;
 use thiserror::Error;
@@ -20,7 +22,13 @@ pub enum ParserError {
     ExpectedIdentifier,
 
     #[error("Expected token: {0:?}")]
-    ExpectedToken(Token),
+    ExpectedToken(Token, Range<usize>),
+
+    #[error("Expected float")]
+    ExpectedFloat,
+
+    #[error("Expected integer")]
+    ExpectedInteger,
 }
 
 impl<I: ToString> ParseError<I> for ParserError {
@@ -45,7 +53,9 @@ impl From<nom::Err<ParserError>> for ParserError {
                 ParserError::IncompleteInput(e) => ParserError::IncompleteInput(e),
                 ParserError::UnsupportedRequirement(e) => ParserError::UnsupportedRequirement(e),
                 ParserError::ExpectedIdentifier => ParserError::ExpectedIdentifier,
-                ParserError::ExpectedToken(e) => ParserError::ExpectedToken(e),
+                ParserError::ExpectedToken(token, span) => ParserError::ExpectedToken(token, span),
+                ParserError::ExpectedFloat => ParserError::ExpectedFloat,
+                ParserError::ExpectedInteger => ParserError::ExpectedInteger,
             },
         }
     }
