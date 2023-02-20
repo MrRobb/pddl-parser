@@ -19,6 +19,12 @@ pub struct Object {
     pub type_: String,
 }
 
+impl Object {
+    pub fn to_pddl(&self) -> String {
+        format!("({} - {})", self.name, self.type_)
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Problem {
     pub name: String,
@@ -131,20 +137,19 @@ impl Problem {
         pddl.push_str(&format!("(:domain {})\n", self.domain));
 
         // Objects
-        pddl.push_str("(:objects\n");
-        for object in &self.objects {
-            pddl.push_str(&format!("{} - {}\n", object.name, object.type_));
-        }
-        pddl.push_str(")\n");
+        pddl.push_str(&format!(
+            "(:objects\n{}\n)\n",
+            self.objects.iter().map(Object::to_pddl).collect::<Vec<_>>().join("\n")
+        ));
 
         // Init
         pddl.push_str(&format!(
-            "(:init\n{})\n",
+            "(:init\n{}\n)\n",
             self.init.iter().map(Predicate::to_pddl).collect::<Vec<_>>().join("\n")
         ));
 
         // Goal
-        pddl.push_str(&format!("(:goal\n{})\n", &self.goal.to_pddl()));
+        pddl.push_str(&format!("(:goal\n{}\n)\n", &self.goal.to_pddl()));
 
         pddl
     }
