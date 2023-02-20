@@ -35,3 +35,9 @@ impl Parameter {
         self.0.clone()
     }
 }
+
+impl ToString for Parameter {
+    fn to_string(&self) -> String {
+        self.0.clone()
+    }
+}
