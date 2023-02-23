@@ -64,3 +64,9 @@ impl Plan {
         self.0.iter()
     }
 }
+
+impl FromIterator<Action> for Plan {
+    fn from_iter<T: IntoIterator<Item = Action>>(iter: T) -> Self {
+        Self(iter.into_iter().collect())
+    }
+}
