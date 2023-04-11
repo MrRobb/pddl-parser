@@ -66,8 +66,8 @@ impl Plan {
 }
 
 impl IntoIterator for Plan {
-    type Item = Action;
     type IntoIter = std::vec::IntoIter<Self::Item>;
+    type Item = Action;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
