@@ -7,6 +7,8 @@
     clippy::module_inception
 )]
 
+// TODO: #![warn(clippy::unwrap_used, clippy::panic, clippy::expect_used)]
+
 pub mod domain;
 pub mod error;
 pub mod lexer;
