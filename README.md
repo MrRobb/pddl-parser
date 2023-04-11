@@ -1,3 +1,5 @@
+![Workflow](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+
 # PDDL Parser
 
 Parser for PDDL (Planning Domain Definition Language) files.
