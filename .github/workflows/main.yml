@@ -27,6 +27,7 @@ jobs:
 
   clippy:
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - uses: actions/checkout@v3
 
@@ -43,6 +44,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - uses: actions/checkout@v3
 
@@ -73,6 +75,7 @@ jobs:
 
   msrv:
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - uses: actions/checkout@v3
 
@@ -94,6 +97,7 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
+    needs: test
 
     steps:
       # Checkout repository
