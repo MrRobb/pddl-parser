@@ -1,4 +1,5 @@
 ![Workflow](https://github.com/mrrobb/pddl-parser/actions/workflows/main.yml/badge.svg)
+[![codecov](https://codecov.io/gh/MrRobb/pddl-parser/branch/nom/graph/badge.svg?token=2Q2DJWGE2H)](https://codecov.io/gh/MrRobb/pddl-parser)
 
 # PDDL Parser
 
