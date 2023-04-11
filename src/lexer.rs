@@ -6,7 +6,9 @@ use nom::InputLength;
 
 use crate::error::ParserError;
 
-#[derive(Debug, Display, Clone, PartialEq, Logos)]
+#[derive(Logos, Debug, Display, Clone, PartialEq)]
+#[logos(skip r"[ \t\n\f\r]+")]
+#[logos(error = ParserError)]
 pub enum Token {
     // Open parenthesis
     #[regex(r"\([ \t\n\f]*")]
@@ -231,15 +233,6 @@ pub enum Token {
     // Packages
     #[regex(r#"\(\s*in-package\s+("[^"]*"|[^)\s]*)\)"#, logos::skip)]
     Package,
-
-    // Whitespace
-    #[regex(r"[ \t\n\f\r]+", logos::skip)]
-    Whitespace,
-
-    // Error
-    #[error]
-    #[regex(r"", logos::skip)]
-    Error,
 }
 
 pub struct TokenStream<'a> {
@@ -269,12 +262,12 @@ impl<'a> TokenStream<'a> {
         self.len() == 0
     }
 
-    pub fn peek(&self) -> Option<(Token, &'a str)> {
+    pub fn peek(&self) -> Option<(Result<Token, ParserError>, &'a str)> {
         let mut iter = self.lexer.clone().spanned();
         iter.next().map(|(t, span)| (t, &self.lexer.source()[span]))
     }
 
-    pub fn peek_n(&self, n: usize) -> Option<Vec<(Token, String)>> {
+    pub fn peek_n(&self, n: usize) -> Option<Vec<(Result<Token, ParserError>, String)>> {
         let mut iter = self.lexer.clone().spanned();
         let mut tokens = Vec::new();
         for _ in 0..n {
@@ -299,7 +292,7 @@ impl<'a> TokenStream<'a> {
 impl<'a> nom::Parser<TokenStream<'a>, &'a str, ParserError> for Token {
     fn parse(&mut self, input: TokenStream<'a>) -> nom::IResult<TokenStream<'a>, &'a str, ParserError> {
         match input.peek() {
-            Some((t, s)) if t == *self => Ok((input.advance(), s)),
+            Some((Ok(t), s)) if t == *self => Ok((input.advance(), s)),
             _ => Err(nom::Err::Error(ParserError::ExpectedToken(
                 self.clone(),
                 input.span(),
