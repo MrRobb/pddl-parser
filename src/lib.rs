@@ -6,7 +6,15 @@
     clippy::return_self_not_must_use,
     clippy::module_inception
 )]
-#![warn(clippy::unwrap_used, clippy::panic, clippy::todo, clippy::unimplemented)]
+#![warn(
+    clippy::unwrap_used,
+    clippy::panic,
+    clippy::todo,
+    clippy::unimplemented,
+    missing_docs,
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc
+)]
 
 pub mod domain;
 pub mod error;
