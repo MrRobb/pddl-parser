@@ -2,7 +2,7 @@
 name = "pddl-parser"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.62.1"
+rust-version = "1.63.0"
 
 [dependencies]
 nom = "7.1"
