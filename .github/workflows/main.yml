@@ -81,8 +81,13 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          components: msrv
           profile: minimal
+
+      - name: Install cargo-msrv
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: cargo-msrv
 
       # Check
       - run: cargo msrv verify
