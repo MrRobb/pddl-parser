@@ -56,7 +56,10 @@ pub struct Plan(pub Vec<Action>);
 
 impl Plan {
     pub fn parse(input: TokenStream) -> Result<Self, ParserError> {
-        let (_, plan) = many0(Action::parse)(input)?;
+        let (output, plan) = many0(Action::parse)(input)?;
+        if !output.is_empty() {
+            return Err(ParserError::ExpectedEndOfInput);
+        }
         Ok(Plan(plan))
     }
 

@@ -57,10 +57,10 @@ fn main() {
 - [x] Testing:
   - [x] Add tests for all PDDL files in [pddl-instances](https://github.com/potassco/pddl-instances)
 
-- [ ] Error handling:
+- [x] Error handling:
   - [x] Custom errors (using [thiserror](https://crates.io/crates/thiserror))
   - [x] Forbid unwrap
-  - [ ] Check that all of the input has been consumed
+  - [x] Check that all of the input has been consumed
 
 - [ ] Documentation:
   - [ ] Add documentation for all public items

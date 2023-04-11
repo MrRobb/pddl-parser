@@ -38,11 +38,14 @@ pub struct Problem {
 
 impl Problem {
     pub fn parse(input: TokenStream) -> Result<Self, ParserError> {
-        let (_, problem) = delimited(
+        let (output, problem) = delimited(
             Token::OpenParen,
             preceded(Token::Define, Problem::parse_problem),
             Token::CloseParen,
         )(input)?;
+        if !output.is_empty() {
+            return Err(ParserError::ExpectedEndOfInput);
+        }
         Ok(problem)
     }
 

@@ -33,6 +33,9 @@ pub enum ParserError {
     #[error("Lexer error")]
     LexerError,
 
+    #[error("Expected end of input")]
+    ExpectedEndOfInput,
+
     #[default]
     #[error("Unknown error")]
     UnknownError,
@@ -76,6 +79,7 @@ impl From<nom::Err<ParserError>> for ParserError {
                 ParserError::ExpectedInteger => ParserError::ExpectedInteger,
                 ParserError::LexerError => ParserError::LexerError,
                 ParserError::UnknownError => ParserError::UnknownError,
+                ParserError::ExpectedEndOfInput => ParserError::ExpectedEndOfInput,
             },
         }
     }

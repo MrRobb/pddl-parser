@@ -26,11 +26,14 @@ pub struct Domain {
 
 impl Domain {
     pub fn parse(input: TokenStream) -> Result<Self, ParserError> {
-        let (_, domain) = delimited(
+        let (output, domain) = delimited(
             Token::OpenParen,
             preceded(Token::Define, Domain::parse_domain),
             Token::CloseParen,
         )(input)?;
+        if !output.is_empty() {
+            return Err(ParserError::ExpectedEndOfInput);
+        }
         Ok(domain)
     }
 
