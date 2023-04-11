@@ -6,8 +6,7 @@
     clippy::return_self_not_must_use,
     clippy::module_inception
 )]
-
-// TODO: #![warn(clippy::unwrap_used, clippy::panic, clippy::expect_used)]
+#![warn(clippy::unwrap_used, clippy::panic, clippy::todo, clippy::unimplemented)]
 
 pub mod domain;
 pub mod error;
@@ -32,18 +31,18 @@ mod tests {
     #[test]
     fn test_domain_to_pddl() {
         let domain_example = include_str!("../tests/domain.pddl");
-        let domain = Domain::parse(domain_example.into()).unwrap();
+        let domain = Domain::parse(domain_example.into()).expect("Failed to parse domain");
         eprintln!("{}", domain.to_pddl());
-        let redomain = Domain::parse(domain.to_pddl().as_str().into()).unwrap();
+        let redomain = Domain::parse(domain.to_pddl().as_str().into()).expect("Failed to parse domain again");
         assert_eq!(domain, redomain);
     }
 
     #[test]
     fn test_problem_to_pddl() {
         let problem_example = include_str!("../tests/problem.pddl");
-        let problem = Problem::parse(problem_example.into()).unwrap();
+        let problem = Problem::parse(problem_example.into()).expect("Failed to parse problem");
         eprintln!("{}", problem.to_pddl());
-        let reproblem = Problem::parse(problem.to_pddl().as_str().into()).unwrap();
+        let reproblem = Problem::parse(problem.to_pddl().as_str().into()).expect("Failed to parse problem again");
         assert_eq!(problem, reproblem);
     }
 
@@ -51,7 +50,7 @@ mod tests {
     fn test_plan() {
         let plan_example = include_str!("../tests/plan.txt");
         assert_eq!(
-            Plan::parse(plan_example.into()).unwrap(),
+            Plan::parse(plan_example.into()).expect("Failed to parse plan"),
             Plan(vec![
                 Action {
                     name: "pick-up".into(),
@@ -73,7 +72,7 @@ mod tests {
     fn test_problem() {
         let problem_example = include_str!("../tests/problem.pddl");
         assert_eq!(
-            Problem::parse(problem_example.into()).unwrap(),
+            Problem::parse(problem_example.into()).expect("Failed to parse problem"),
             Problem {
                 name: "letseat-simple".into(),
                 domain: "letseat".into(),
@@ -128,7 +127,7 @@ mod tests {
         pretty_env_logger::init();
         let domain_example = include_str!("../tests/domain.pddl");
         assert_eq!(
-            Domain::parse(domain_example.into()).unwrap(),
+            Domain::parse(domain_example.into()).expect("Failed to parse domain"),
             Domain {
                 name: "letseat".into(),
                 requirements: vec![Requirement::Typing],
