@@ -9,9 +9,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  checks:
+  fmt:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
 
@@ -23,6 +22,15 @@ jobs:
           components: rustfmt
           profile: minimal
 
+      # Check
+      - run: cargo +nightly fmt -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Setup toolchain
       - name: Setup toolchain stable
         uses: actions-rs/toolchain@v1
         with:
@@ -30,17 +38,51 @@ jobs:
           components: clippy
           profile: minimal
 
-      # Cache
-      - uses: actions/cache@v3
-        with:
-          key: rs-${{ runner.os }}-${{ steps.rust-toolchain.outputs.rustc_hash }}-${{ hashFiles('**/Cargo.*') }}-build
-          restore-keys: |
-            rs-${{ runner.os }}-${{ steps.rust-toolchain.outputs.rustc_hash }}-${{ hashFiles('**/Cargo.*') }}-
-            rs-${{ runner.os }}-${{ steps.rust-toolchain.outputs.rustc_hash }}-
-          path: ~/.cargo
-
-      # Checks
-      - run: cargo +nightly fmt -- --check
+      # Check
       - run: cargo clippy -- -D clippy::nursery -D clippy::perf -D clippy::pedantic
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Setup toolchain
+      - name: Setup toolchain stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+
+      # Check
       - run: cargo test
-      - run: cargo build --all-features --all-targets --release
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Setup toolchain
+      - name: Setup toolchain stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+
+      # Check
+      - run: cargo build --all-targets --release
+
+  msrv:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Setup toolchain
+      - name: Setup toolchain stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: msrv
+          profile: minimal
+
+      # Check
+      - run: cargo msrv verify
