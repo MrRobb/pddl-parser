@@ -52,12 +52,12 @@ fn main() {
 - [ ] PDDL Features
   - [ ] Better support for types (assign types to variables, etc.)
 
-- [ ] Testing:
-  - [ ] Add tests for all PDDL files in [pddl-instances](https://github.com/potassco/pddl-instances)
+- [x] Testing:
+  - [x] Add tests for all PDDL files in [pddl-instances](https://github.com/potassco/pddl-instances)
 
 - [ ] Error handling:
-  - [ ] Custom errors (using [thiserror](https://crates.io/crates/thiserror))
-  - [ ] Forbid unwrap
+  - [x] Custom errors (using [thiserror](https://crates.io/crates/thiserror))
+  - [x] Forbid unwrap
   - [ ] Check that all of the input has been consumed
 
 - [ ] Documentation:
