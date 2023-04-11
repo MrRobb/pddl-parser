@@ -22,7 +22,7 @@ num-traits = "0.2.15"
 criterion = "0.4"
 
 # Testing
-git2 = { version = "0.16", features = ["vendored-openssl"] }
+git2 = { version = "0.17", features = ["vendored-openssl"] }
 url = "2.3"
 indicatif = "0.17"
 tempfile = "3.3"
