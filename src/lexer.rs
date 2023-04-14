@@ -184,7 +184,7 @@ pub enum Token {
     /// The `:domain-axioms` requirement (PDDL 1)
     #[token(":domain-axioms", ignore(ascii_case))]
     DomainAxioms,
-    
+
     /// The `:subgoals-through-axioms` requirement (PDDL 1)
     #[token(":subgoals-through-axioms", ignore(ascii_case))]
     SubgoalsThroughAxioms,
@@ -200,7 +200,7 @@ pub enum Token {
     /// The `:fluents` requirement (PDDL 1)
     #[token(":fluents", ignore(ascii_case))]
     Fluents,
-    
+
     /// The `:open-world` requirement (PDDL 1)
     #[token(":open-world", ignore(ascii_case))]
     OpenWorld,
@@ -243,7 +243,7 @@ pub enum Token {
     /// The `:derived-predicates` requirement (PDDL 2.2)
     #[token(":derived-predicates", ignore(ascii_case))]
     DerivedPredicates,
-    
+
     /// The `:timed-initial-literals` requirement (PDDL 2.2)
     #[token(":timed-initial-literals", ignore(ascii_case))]
     TimedInitialLiterals,
@@ -252,7 +252,7 @@ pub enum Token {
     /// The `:preferences` requirement (PDDL 3)
     #[token(":preferences", ignore(ascii_case))]
     Preferences,
-    
+
     /// The `:constraints` requirement (PDDL 3)
     #[token(":constraints", ignore(ascii_case))]
     Constraints,
@@ -261,7 +261,7 @@ pub enum Token {
     /// The `:action-costs` requirement (PDDL 3.1)
     #[token(":action-costs", ignore(ascii_case))]
     ActionCosts,
-    
+
     /// The `:goal-utilities` requirement (PDDL 3.1)
     #[token(":goal-utilities", ignore(ascii_case))]
     GoalUtilities,
