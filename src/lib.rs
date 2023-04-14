@@ -12,15 +12,22 @@
     clippy::todo,
     clippy::unimplemented,
     missing_docs,
-    clippy::missing_errors_doc,
     clippy::missing_panics_doc
 )]
 
+//! # PDDL Parser
+
+/// The domain module contains the types used to represent a PDDL domain.
 pub mod domain;
+/// The error module contains the error types used by the library.
 pub mod error;
+/// The lexer module contains the lexer used to tokenize a PDDL file.
 pub mod lexer;
+/// The plan module contains the types used to represent a PDDL plan.
 pub mod plan;
+/// The problem module contains the types used to represent a PDDL problem.
 pub mod problem;
+/// The tokens module contains the functions used to parse tokens.
 pub mod tokens;
 
 #[cfg(test)]

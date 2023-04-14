@@ -8,14 +8,18 @@ use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
 
+/// A constant with a type.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Constant {
+    /// The name of the constant.
     pub name: String,
+    /// The type of the constant.
     #[serde(rename = "type")]
     pub type_: Type,
 }
 
 impl Constant {
+    /// Parse a list of constants from a token stream.
     pub fn parse_constants(input: TokenStream) -> IResult<TokenStream, Vec<Constant>, ParserError> {
         log::debug!("BEGIN > parse_constants {:?}", input.span());
         let (output, constants) = delimited(
@@ -39,6 +43,7 @@ impl Constant {
         Ok((output, constants))
     }
 
+    /// Convert the constant to PDDL.
     pub fn to_pddl(&self) -> String {
         format!("({} - {})", self.name, self.type_.to_pddl())
     }

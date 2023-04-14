@@ -9,15 +9,19 @@ use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::var;
 
+/// A parameter with a type.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TypedParameter {
+    /// The name of the parameter.
     pub name: String,
+    /// The type of the parameter. If not specified, the type is `object`.
     #[serde(rename = "type")]
     #[serde(default)]
     pub type_: Type,
 }
 
 impl TypedParameter {
+    /// Parse a list of typed parameters from a token stream.
     pub fn parse_typed_parameters(input: TokenStream) -> IResult<TokenStream, Vec<TypedParameter>, ParserError> {
         log::debug!("BEGIN > parse_typed_parameters {:?}", input.span());
         let (output, params) = many0(pair(many1(var), opt(preceded(Token::Dash, Type::parse_type))))(input)?;
@@ -35,6 +39,7 @@ impl TypedParameter {
         Ok((output, params))
     }
 
+    /// Convert the typed parameter to PDDL.
     pub fn to_pddl(&self) -> String {
         format!("{} - {}", self.name, self.type_.to_pddl())
     }

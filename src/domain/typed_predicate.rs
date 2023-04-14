@@ -9,14 +9,18 @@ use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
 
+/// A predicate with typed parameters.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TypedPredicate {
+    /// The name of the predicate.
     pub name: String,
+    /// The parameters of the predicate.
     #[serde(default)]
     pub parameters: Vec<TypedParameter>,
 }
 
 impl TypedPredicate {
+    /// Parse a list of functions from a token stream.
     pub fn parse_functions(input: TokenStream) -> IResult<TokenStream, Vec<TypedPredicate>, ParserError> {
         log::debug!("BEGIN > parse_functions {:?}", input.span());
         let (output, functions) = opt(delimited(
@@ -40,6 +44,7 @@ impl TypedPredicate {
         Ok((output, functions))
     }
 
+    /// Parse a list of predicates from a token stream.
     pub fn parse_predicates(input: TokenStream) -> IResult<TokenStream, Vec<TypedPredicate>, ParserError> {
         log::debug!("BEGIN > parse_predicates {:?}", input.span());
         let (output, predicates) = delimited(
@@ -62,6 +67,7 @@ impl TypedPredicate {
         Ok((output, predicates))
     }
 
+    /// Convert the predicate to PDDL.
     pub fn to_pddl(&self) -> String {
         format!(
             "({} {})",

@@ -8,50 +8,83 @@ use serde::{Deserialize, Serialize};
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 
+/// An enumeration of requirements for the Planning Domain Definition Language (PDDL).
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Requirement {
     // PDDL 1
+    /// The basic STRIPS-style action representation.
     Strips,
+    /// Allows the use of types to define objects and restrict the arguments of predicates and functions.
     Typing,
+    /// Allows the use of disjunctions in action preconditions.
     DisjunctivePreconditions,
+    /// Supports the use of the equality predicate "=".
     Equality,
+    /// Allows the use of existential quantifiers in action preconditions.
     ExistentialPreconditions,
+    /// Allows the use of universal quantifiers in action preconditions.
     UniversalPreconditions,
+    /// A shorthand for both `ExistentialPreconditions` and `UniversalPreconditions`.
     QuantifiedPreconditions,
+    /// Allows the use of conditional effects in actions.
     ConditionalEffects,
+    /// Supports the use of action expansions, which allow actions to be defined in terms of sub-actions.
     ActionExpansions,
+    /// Supports the use of "for-each" expansions, which allow actions to be defined in terms of sub-actions that are applied to all objects of a certain type.
     ForeachExpansions,
+    /// Supports the use of directed acyclic graph (DAG) expansions, which allow actions to be defined in terms of sub-actions with complex dependencies.
     DagExpansions,
+    /// Allows the use of domain axioms, which define derived predicates in terms of other predicates.
     DomainAxioms,
+    /// Allows subgoals to be achieved through axioms.
     SubgoalsThroughAxioms,
+    /// Supports the use of safety constraints, which restrict the set of possible plans.
     SafetyConstraints,
+    /// Allows expressions to be evaluated during planning.
     ExpressionEvaluation,
+    /// Supports the use of fluents, which are functions that can change value during planning.
     Fluents,
+    /// Assumes an open world, where facts not known to be true are assumed to be false.
     OpenWorld,
+    /// Supports the use of "strong" negation, where negated facts are assumed to be true unless proven otherwise.
     TrueNegation,
+    /// A shorthand for several requirements that together define the ADL (Action Description Language) subset of PDDL.
     Adl,
+    /// Supports the use of UCPOP-style conditional planning.
     Ucpop,
 
     // PDDL 2.1
+    /// Allows the use of numeric fluents, which are functions that return real numbers and can be used in expressions and conditions.
     NumericFluents,
+    /// Supports the use of durative actions, which have a duration and can have different effects at different points in time.
     DurativeActions,
+    /// Allows the use of inequalities in durative action conditions.
     DurativeInequalities,
+    /// Supports the use of continuous effects, which change the value of fluents continuously over time.
     ContinuousEffects,
+    /// Allows negative preconditions in actions.
     NegativePreconditions,
 
     // PDDL 2.2
+    /// Allows the definition of derived predicates, which are defined in terms of other predicates and can be used in preconditions and goals.
     DerivedPredicates,
+    /// Supports the use of timed initial literals, which specify facts that become true or false at specific points in time.
     TimedInitialLiterals,
 
     // PDDL 3
+    /// Allows the specification of preferences, which define soft constraints on plans.
     Preferences,
+    /// Supports the specification of constraints on plans.
     Constraints,
 
     // PDDL 3.1
+    /// Allows actions to have associated costs, which can be minimized during planning.
     ActionCosts,
+    /// Supports the specification of utilities for achieving goals.
     GoalUtilities,
 
     // PDDL+
+    /// Supports reasoning about continuous time.
     Time,
 }
 
@@ -113,6 +146,7 @@ impl Requirement {
         ))(input)
     }
 
+    /// Parse the requirements from a token stream.
     pub fn parse_requirements(input: TokenStream) -> IResult<TokenStream, Vec<Requirement>, ParserError> {
         log::debug!("BEGIN > parse_requirements {:?}", input.span());
         let (output, requirements) = opt(delimited(
@@ -135,6 +169,7 @@ impl Requirement {
         Ok((output, requirements.unwrap_or_default()))
     }
 
+    /// Convert the requirement to the PDDL requirement string.
     pub fn to_pddl(&self) -> String {
         match self {
             // PDDL 1

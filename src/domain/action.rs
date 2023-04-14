@@ -10,16 +10,22 @@ use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
 
+/// An action with typed parameters.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Action {
+    /// The name of the action.
     pub name: String,
+    /// The parameters of the action.
     #[serde(default)]
     pub parameters: Vec<TypedParameter>,
+    /// The precondition of the action.
     pub precondition: Option<Expression>,
+    /// The effect of the action.
     pub effect: Expression,
 }
 
 impl Action {
+    /// Parse a list of actions from a token stream.
     pub fn parse_actions(input: TokenStream) -> IResult<TokenStream, Vec<Action>, ParserError> {
         log::debug!("BEGIN > parse_actions {:?}", input.span());
         log::debug!("Parsing actions: {:?}", input.peek_n(10));
@@ -55,6 +61,7 @@ impl Action {
         Ok((output, actions))
     }
 
+    /// Convert the action to PDDL.
     pub fn to_pddl(&self) -> String {
         let mut pddl = String::new();
 

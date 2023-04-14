@@ -12,9 +12,12 @@ use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
 
+/// A type is either a simple type or one of the list of specified types.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Type {
+    /// The type is a simple type.
     Simple(String),
+    /// The type must be one of the specified types.
     Either(Vec<String>),
 }
 
@@ -31,6 +34,7 @@ impl Default for Type {
 }
 
 impl Type {
+    /// Parse a type from a token stream.
     pub fn parse_type(input: TokenStream) -> IResult<TokenStream, Type, ParserError> {
         log::debug!("BEGIN > parse_type {:?}", input.span());
         let (output, type_) = alt((
@@ -44,6 +48,7 @@ impl Type {
         Ok((output, type_))
     }
 
+    /// Parse a list of types from a token stream.
     pub fn parse_types(input: TokenStream) -> IResult<TokenStream, Vec<TypeDef>, ParserError> {
         log::debug!("BEGIN > parse_types {:?}", input.span());
         let (output, types) = delimited(
@@ -64,6 +69,7 @@ impl Type {
         Ok((output, types))
     }
 
+    /// Convert the type to PDDL.
     pub fn to_pddl(&self) -> String {
         match self {
             Type::Simple(s) => s.to_string(),

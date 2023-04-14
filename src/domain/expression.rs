@@ -10,35 +10,54 @@ use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::{id, integer};
 
+/// An enumeration of binary operations that can be used in expressions.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum BinaryOp {
+    /// Addition operation.
     Add,
+    /// Subtraction operation.
     Subtract,
+    /// Multiplication operation.
     Multiply,
+    /// Division operation.
     Divide,
 }
 
+/// An enumeration of expressions that can be used in PDDL planning domains and problems.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Expression {
+    /// An atomic expression consisting of a name and an optional list of parameters.
     Atom {
+        /// The name of the atom.
         name: String,
+        /// The parameters of the atom.
         #[serde(default)]
         parameters: Vec<Parameter>,
     },
+    /// A logical "and" expression that takes a list of sub-expressions as arguments.
     And(Vec<Expression>),
+    /// A logical "not" expression that takes a single sub-expression as an argument.
     Not(Box<Expression>),
 
     // Assign operator
+    /// An assignment expression that assigns the value of the second sub-expression to the first sub-expression.
     Assign(Box<Expression>, Box<Expression>),
+    /// An increase expression that increases the value of the first sub-expression by the value of the second sub-expression.
     Increase(Box<Expression>, Box<Expression>),
+    /// A decrease expression that decreases the value of the first sub-expression by the value of the second sub-expression.
     Decrease(Box<Expression>, Box<Expression>),
+    /// A scale-up expression that multiplies the value of the first sub-expression by the value of the second sub-expression.
     ScaleUp(Box<Expression>, Box<Expression>),
+    /// A scale-down expression that divides the value of the first sub-expression by the value of the second sub-expression.
     ScaleDown(Box<Expression>, Box<Expression>),
+    /// A binary operation expression that applies a binary operation to two sub-expressions.
     BinaryOp(BinaryOp, Box<Expression>, Box<Expression>),
+    /// A numeric constant expression.
     Number(i64),
 }
 
 impl Expression {
+    /// Parse an expression from a token stream.
     pub fn parse_expression(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
         log::debug!("BEGIN > parse_expression {:?}", input.span());
         let (output, expression) = alt((
@@ -58,6 +77,7 @@ impl Expression {
         Ok((output, expression))
     }
 
+    /// Convert the expression to PDDL.
     pub fn to_pddl(&self) -> String {
         match self {
             Expression::Atom { name, parameters } => format!(

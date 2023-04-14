@@ -13,18 +13,27 @@ use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
 
+/// A PDDL domain.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Domain {
+    /// The name of the domain.
     pub name: String,
+    /// The requirements of the domain.
     pub requirements: Vec<Requirement>,
+    /// The types of the domain.
     pub types: Vec<TypeDef>,
+    /// The constants of the domain.
     pub constants: Vec<Constant>,
+    /// The predicates of the domain.
     pub predicates: Vec<TypedPredicate>,
+    /// The functions of the domain.
     pub functions: Vec<TypedPredicate>,
+    /// The actions of the domain.
     pub actions: Vec<Action>,
 }
 
 impl Domain {
+    /// Parse a domain from a token stream.
     pub fn parse(input: TokenStream) -> Result<Self, ParserError> {
         let (output, domain) = delimited(
             Token::OpenParen,
@@ -69,6 +78,7 @@ impl Domain {
         Ok((output, domain))
     }
 
+    /// Convert the domain to PDDL.
     pub fn to_pddl(&self) -> String {
         let mut output = String::new();
 

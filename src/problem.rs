@@ -12,31 +12,44 @@ use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
 
+/// A PDDL object
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Object {
+    /// The name of the object
     pub name: String,
+    /// The type of the object
     #[serde(rename = "type")]
     pub type_: String,
 }
 
 impl Object {
+    /// Convert a typed object to a PDDL format. That is `name - type`.
     pub fn to_pddl(&self) -> String {
         format!("{} - {}", self.name, self.type_)
     }
 }
 
+/// A PDDL problem
+///
+/// A problem is a description of a particular planning problem. It consists of a domain, a set of objects, an initial state, and a goal state.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Problem {
+    /// The name of the problem
     pub name: String,
+    /// The name of the domain of the problem
     pub domain: String,
+    /// The objects of the problem
     #[serde(default)]
     pub objects: Vec<Object>,
+    /// The initial state of the problem
     #[serde(default)]
     pub init: Vec<Predicate>,
+    /// The goal of the problem
     pub goal: Expression,
 }
 
 impl Problem {
+    /// Parse a PDDL problem
     pub fn parse(input: TokenStream) -> Result<Self, ParserError> {
         let (output, problem) = delimited(
             Token::OpenParen,
@@ -132,6 +145,7 @@ impl Problem {
         Ok((output, goal))
     }
 
+    /// Convert the problem to PDDL format (as a string) for writing to a file
     pub fn to_pddl(&self) -> String {
         let mut pddl = String::new();
 
