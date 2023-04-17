@@ -27,7 +27,7 @@ git2 = { version = "0.17.0", features = ["vendored-openssl"] }
 url = "2.3"
 indicatif = "0.17"
 tempfile = "3.5.0"
-cached = "0.42.0"
+cached = "0.43.0"
 pretty_env_logger = "0.4.0"
 
 [profile.release]
