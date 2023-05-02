@@ -900,7 +900,7 @@ dependencies = [
  "num-traits",
  "pretty_env_logger",
  "profiling",
- "puffin 0.14.3",
+ "puffin 0.15.0",
  "puffin_http",
  "serde",
  "simple_logger",
@@ -1031,6 +1031,17 @@ dependencies = [
  "ruzstd",
  "serde",
  "zstd",
+]
+
+[[package]]
+name = "puffin"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f99b70359a44d98fceb167734e8cc19e232fe885a547f1b622e66d8099931b6"
+dependencies = [
+ "byteorder",
+ "instant",
+ "once_cell",
 ]
 
 [[package]]
