@@ -28,7 +28,7 @@ num-traits = "0.2.15"
 
 [dev-dependencies]
 # Benchmarking
-criterion = "0.4"
+criterion = "0.5"
 
 # Testing
 git2 = { version = "0.17.1", features = ["vendored-openssl"] }
