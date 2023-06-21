@@ -6,6 +6,7 @@ use nom::IResult;
 use serde::{Deserialize, Serialize};
 
 use super::parameter::Parameter;
+use crate::domain::typed_parameter::TypedParameter;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::{id, integer};
@@ -54,6 +55,10 @@ pub enum Expression {
     BinaryOp(BinaryOp, Box<Expression>, Box<Expression>),
     /// A numeric constant expression.
     Number(i64),
+
+    // Forall
+    /// A forall expression that takes a list of typed parameters and a sub-expression as arguments.
+    Forall(Vec<TypedParameter>, Box<Expression>),
 }
 
 impl Expression {
@@ -72,6 +77,7 @@ impl Expression {
                 Self::parse_increase,
                 Self::parse_decrease,
             )),
+            Self::parse_forall,
         ))(input)?;
         log::debug!("END < parse_expression {:?}", output.span());
         Ok((output, expression))
@@ -119,6 +125,15 @@ impl Expression {
                 exp2.to_pddl()
             ),
             Expression::Number(n) => n.to_string(),
+            Expression::Forall(parameters, expression) => format!(
+                "(forall ({}) {})",
+                parameters
+                    .iter()
+                    .map(TypedParameter::to_pddl)
+                    .collect::<Vec<_>>()
+                    .join(" "),
+                expression.to_pddl()
+            ),
         }
     }
 
@@ -292,6 +307,30 @@ impl Expression {
             |(exp1, exp2)| Expression::Decrease(Box::new(exp1), Box::new(exp2)),
         )(input)?;
         log::debug!("END < parse_decrease {:?}", output.span());
+        Ok((output, expression))
+    }
+
+    fn parse_forall(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
+        log::debug!("BEGIN > parse_forall {:?}", input.span());
+        let (output, expression) = map(
+            delimited(
+                Token::OpenParen,
+                preceded(
+                    Token::Forall,
+                    tuple((
+                        delimited(
+                            Token::OpenParen,
+                            TypedParameter::parse_typed_parameters,
+                            Token::CloseParen,
+                        ),
+                        Expression::parse_expression,
+                    )),
+                ),
+                Token::CloseParen,
+            ),
+            |(parameters, expression)| Expression::Forall(parameters, Box::new(expression)),
+        )(input)?;
+        log::debug!("END < parse_forall {:?}", output.span());
         Ok((output, expression))
     }
 }

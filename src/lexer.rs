@@ -116,6 +116,10 @@ pub enum Token {
     #[token("decrease", ignore(ascii_case))]
     Decrease,
 
+    /// The `forall` keyword
+    #[token("forall", ignore(ascii_case))]
+    Forall,
+
     /// A number (positive or negative, e.g. `1` or `-1`)
     #[regex(r"-?[0-9]+", |lex| lex.slice().parse())]
     Integer(i64),
