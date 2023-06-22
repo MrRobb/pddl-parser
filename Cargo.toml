@@ -17,26 +17,26 @@ nom = "7.1"
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
 profiling = { version = "1.0", features = ["profile-with-puffin"] }
-puffin_http = "0.12"
+puffin_http = "0.13.0"
 simple_logger = "4.1"
 log = "0.4"
-puffin = "0.15"
+puffin = "0.16.0"
 indicatif = "0.17"
 logos = "0.13.0"
 derive_more = "0.99"
 num-traits = "0.2.15"
 
 [dev-dependencies]
-# Benchmarking
-criterion = "0.4"
+criterion = "0.5.0"
+clap = { version = "4.3.5", features = ["derive"] }
 
 # Testing
 git2 = { version = "0.17.1", features = ["vendored-openssl"] }
 url = "2.3"
 indicatif = "0.17"
 tempfile = "3.5.0"
-cached = "0.43.0"
-pretty_env_logger = "0.4.0"
+cached = "0.44.0"
+pretty_env_logger = "0.5.0"
 
 [profile.release]
 lto = true
