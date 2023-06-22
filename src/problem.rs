@@ -1,13 +1,14 @@
-use std::string::ToString;
-
-use nom::multi::many0;
-use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
+use nom::sequence::{delimited, pair, preceded, tuple};
 use nom::IResult;
+use nom::{
+    combinator::opt,
+    multi::{many0, many1},
+};
 use serde::{Deserialize, Serialize};
 
 use crate::domain::expression::Expression;
-use crate::domain::parameter::Parameter;
 use crate::domain::predicate::Predicate;
+use crate::domain::{parameter::Parameter, typing::Type};
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
@@ -19,13 +20,13 @@ pub struct Object {
     pub name: String,
     /// The type of the object
     #[serde(rename = "type")]
-    pub type_: String,
+    pub type_: Type,
 }
 
 impl Object {
     /// Convert a typed object to a PDDL format. That is `name - type`.
     pub fn to_pddl(&self) -> String {
-        format!("{} - {}", self.name, self.type_)
+        format!("{} - {}", self.name, self.type_.to_pddl())
     }
 }
 
@@ -96,7 +97,10 @@ impl Problem {
     fn parse_objects(input: TokenStream) -> IResult<TokenStream, Vec<Object>, ParserError> {
         let (output, objects) = delimited(
             Token::OpenParen,
-            preceded(Token::Objects, many0(separated_pair(many0(id), Token::Dash, id))),
+            preceded(
+                Token::Objects,
+                many0(pair(many1(id), opt(preceded(Token::Dash, Type::parse_type)))),
+            ),
             Token::CloseParen,
         )(input)?;
         let objects = objects
@@ -106,7 +110,7 @@ impl Problem {
                     .into_iter()
                     .map(|name| Object {
                         name,
-                        type_: type_.to_string(),
+                        type_: type_.clone().unwrap_or_default(),
                     })
                     .collect::<Vec<_>>()
             })
