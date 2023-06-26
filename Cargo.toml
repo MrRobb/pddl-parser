@@ -18,7 +18,7 @@ serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0"
 profiling = { version = "1.0", features = ["profile-with-puffin"] }
 puffin_http = "0.13.0"
-simple_logger = "4.1"
+simple_logger = "4.2"
 log = "0.4"
 puffin = "0.16.0"
 indicatif = "0.17"
