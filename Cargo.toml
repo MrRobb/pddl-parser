@@ -32,7 +32,7 @@ clap = { version = "4.3.8", features = ["derive"] }
 
 # Testing
 git2 = { version = "0.17.2", features = ["vendored-openssl"] }
-url = "2.3"
+url = "2.4"
 indicatif = "0.17"
 tempfile = "3.5.0"
 cached = "0.44.0"
