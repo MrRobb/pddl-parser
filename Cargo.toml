@@ -31,7 +31,7 @@ criterion = "0.5.0"
 clap = { version = "4.3.5", features = ["derive"] }
 
 # Testing
-git2 = { version = "0.17.1", features = ["vendored-openssl"] }
+git2 = { version = "0.17.2", features = ["vendored-openssl"] }
 url = "2.3"
 indicatif = "0.17"
 tempfile = "3.5.0"
