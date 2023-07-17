@@ -22,7 +22,7 @@ derive_more = "0.99"
 
 [dev-dependencies]
 criterion = "0.5.0"
-clap = { version = "4.3.10", features = ["derive"] }
+clap = { version = "4.3.14", features = ["derive"] }
 
 # Testing
 git2 = { version = "0.17.2", features = ["vendored-openssl"] }
