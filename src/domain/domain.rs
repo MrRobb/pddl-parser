@@ -9,9 +9,14 @@ use super::requirement::Requirement;
 use super::typed_predicate::TypedPredicate;
 use super::typedef::TypeDef;
 use super::typing::Type;
-use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
+use crate::{
+    domain::{durative_action::DurativeAction, simple_action::SimpleAction},
+    error::ParserError,
+};
+use nom::branch::alt;
+use nom::combinator::map;
 
 /// A PDDL domain.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -62,7 +67,14 @@ impl Domain {
             opt(Constant::parse_constants),
             TypedPredicate::parse_predicates,
             TypedPredicate::parse_functions,
-            Action::parse_actions,
+            alt((
+                map(DurativeAction::parse_actions, |actions| {
+                    actions.into_iter().map(Action::from).collect()
+                }),
+                map(SimpleAction::parse_actions, |actions| {
+                    actions.into_iter().map(Action::from).collect()
+                }),
+            )),
         ))(input)?;
         let domain = Domain {
             name,

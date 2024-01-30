@@ -6,10 +6,10 @@ use nom::IResult;
 use serde::{Deserialize, Serialize};
 
 use super::parameter::Parameter;
-use crate::domain::typed_parameter::TypedParameter;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::{id, integer};
+use crate::{domain::typed_parameter::TypedParameter, tokens::var};
 
 /// An enumeration of binary operations that can be used in expressions.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
@@ -22,6 +22,15 @@ pub enum BinaryOp {
     Multiply,
     /// Division operation.
     Divide,
+    /// Equality operation.
+    Equal,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum DurationInstant {
+    Start,
+    End,
+    All,
 }
 
 /// An enumeration of expressions that can be used in PDDL planning domains and problems.
@@ -59,6 +68,9 @@ pub enum Expression {
     // Forall
     /// A forall expression that takes a list of typed parameters and a sub-expression as arguments.
     Forall(Vec<TypedParameter>, Box<Expression>),
+
+    // Duration
+    Duration(DurationInstant, Box<Expression>),
 }
 
 impl Expression {
@@ -77,7 +89,9 @@ impl Expression {
                 Self::parse_increase,
                 Self::parse_decrease,
             )),
+            Self::parse_duration,
             Self::parse_forall,
+            Self::parse_comparison,
         ))(input)?;
         log::debug!("END < parse_expression {:?}", output.span());
         Ok((output, expression))
@@ -120,11 +134,21 @@ impl Expression {
                     BinaryOp::Subtract => "-",
                     BinaryOp::Multiply => "*",
                     BinaryOp::Divide => "/",
+                    BinaryOp::Equal => "=",
                 },
                 exp1.to_pddl(),
                 exp2.to_pddl()
             ),
             Expression::Number(n) => n.to_string(),
+            Expression::Duration(instant, exp) => format!(
+                "({} {})",
+                match instant {
+                    DurationInstant::Start => "at start",
+                    DurationInstant::End => "at end",
+                    DurationInstant::All => "over all",
+                },
+                exp.to_pddl()
+            ),
             Expression::Forall(parameters, expression) => format!(
                 "(forall ({}) {})",
                 parameters
@@ -173,6 +197,16 @@ impl Expression {
         Ok((output, expression))
     }
 
+    fn parse_var(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
+        log::debug!("BEGIN > parse_var {:?}", input.span());
+        let (output, expression) = map(var, |name| Expression::Atom {
+            name,
+            parameters: Vec::new(),
+        })(input)?;
+        log::debug!("END < parse_var {:?}", output.span());
+        Ok((output, expression))
+    }
+
     fn parse_assign(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
         log::debug!("BEGIN > parse_assign {:?}", input.span());
         let (output, expression) = map(
@@ -200,6 +234,7 @@ impl Expression {
             map(Token::Dash, |_| BinaryOp::Subtract),
             map(Token::Times, |_| BinaryOp::Multiply),
             map(Token::Divide, |_| BinaryOp::Divide),
+            map(Token::Equal, |_| BinaryOp::Equal),
         ))(input)?;
         log::debug!("END < parse_binary_operator {:?}", output.span());
         Ok((output, op))
@@ -212,8 +247,18 @@ impl Expression {
                 Token::OpenParen,
                 tuple((
                     Self::parse_binary_operator,
-                    alt((Self::parse_number, Self::parse_comparison, Self::parse_atom)),
-                    alt((Self::parse_number, Self::parse_comparison, Self::parse_atom)),
+                    alt((
+                        Self::parse_number,
+                        Self::parse_comparison,
+                        Self::parse_atom,
+                        Self::parse_var,
+                    )),
+                    alt((
+                        Self::parse_number,
+                        Self::parse_comparison,
+                        Self::parse_atom,
+                        Self::parse_var,
+                    )),
                 )),
                 Token::CloseParen,
             ),
@@ -331,6 +376,30 @@ impl Expression {
             |(parameters, expression)| Expression::Forall(parameters, Box::new(expression)),
         )(input)?;
         log::debug!("END < parse_forall {:?}", output.span());
+        Ok((output, expression))
+    }
+
+    fn parse_duration(input: TokenStream) -> IResult<TokenStream, Expression, ParserError> {
+        log::debug!("BEGIN > parse_duration {:?}", input.span());
+        let (output, expression) = delimited(
+            Token::OpenParen,
+            alt((
+                map(
+                    tuple((Token::At, Token::Start, Expression::parse_expression)),
+                    |(_, _, expression)| Expression::Duration(DurationInstant::Start, Box::new(expression)),
+                ),
+                map(
+                    tuple((Token::At, Token::End, Expression::parse_expression)),
+                    |(_, _, expression)| Expression::Duration(DurationInstant::End, Box::new(expression)),
+                ),
+                map(
+                    tuple((Token::Over, Token::All, Expression::parse_expression)),
+                    |(_, _, expression)| Expression::Duration(DurationInstant::All, Box::new(expression)),
+                ),
+            )),
+            Token::CloseParen,
+        )(input)?;
+        log::debug!("END < parse_duration {:?}", output.span());
         Ok((output, expression))
     }
 }

@@ -76,13 +76,25 @@ pub enum Token {
     #[token(":action", ignore(ascii_case))]
     Action,
 
+    /// The `:durative-action` keyword
+    #[token(":durative-action", ignore(ascii_case))]
+    DurativeAction,
+
     /// The `:parameters` keyword
     #[token(":parameters", ignore(ascii_case))]
     Parameters,
 
+    /// The `:duration` keyword
+    #[token(":duration", ignore(ascii_case))]
+    Duration,
+
     /// The `:precondition` keyword
     #[token(":precondition", ignore(ascii_case))]
     Precondition,
+
+    /// The `:condition` keyword
+    #[token(":condition", ignore(ascii_case))]
+    Condition,
 
     /// The `:effect` keyword
     #[token(":effect", ignore(ascii_case))]
@@ -132,6 +144,26 @@ pub enum Token {
     #[token("forall", ignore(ascii_case))]
     Forall,
 
+    /// The `at` keyword
+    #[token("at", ignore(ascii_case))]
+    At,
+
+    /// The `over` keyword
+    #[token("over", ignore(ascii_case))]
+    Over,
+
+    /// The `all` keyword
+    #[token("all", ignore(ascii_case))]
+    All,
+
+    /// The `start` keyword
+    #[token("start", ignore(ascii_case))]
+    Start,
+
+    /// The `end` keyword
+    #[token("end", ignore(ascii_case))]
+    End,
+
     /// A number (positive or negative, e.g. `1` or `-1`)
     #[regex(r"-?[0-9]+", |lex| lex.slice().parse())]
     Integer(i64),
@@ -152,6 +184,10 @@ pub enum Token {
     /// The `-` operator
     #[token("/")]
     Divide,
+
+    /// The `=` operator
+    #[token("=")]
+    Equal,
 
     /// The `:strips` requirement (PDDL 1)
     #[token(":strips", ignore(ascii_case))]
@@ -383,7 +419,7 @@ impl<'a> nom::Parser<TokenStream<'a>, &'a str, ParserError> for Token {
             _ => Err(nom::Err::Error(ParserError::ExpectedToken(
                 self.clone(),
                 input.span(),
-                input.peek_n(10),
+                input.peek_n(30),
             ))),
         }
     }

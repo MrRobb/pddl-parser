@@ -216,7 +216,7 @@ mod tests {
                 ],
                 functions: vec![],
                 actions: vec![
-                    domain::action::Action {
+                    domain::action::Action::Simple(domain::simple_action::SimpleAction {
                         name: "pick-up".into(),
                         parameters: vec![
                             TypedParameter {
@@ -260,8 +260,8 @@ mod tests {
                                 parameters: vec![],
                             })),
                         ])
-                    },
-                    domain::action::Action {
+                    }),
+                    domain::action::Action::Simple(domain::simple_action::SimpleAction {
                         name: "drop".into(),
                         parameters: vec![
                             TypedParameter {
@@ -301,8 +301,8 @@ mod tests {
                                 parameters: vec!["?arm".into(), "?cupcake".into(),],
                             })),
                         ])
-                    },
-                    domain::action::Action {
+                    }),
+                    domain::action::Action::Simple(domain::simple_action::SimpleAction {
                         name: "move".into(),
                         parameters: vec![
                             TypedParameter {
@@ -338,7 +338,7 @@ mod tests {
                                 parameters: vec!["?arm".into(), "?to".into(),],
                             },
                         ])
-                    }
+                    })
                 ],
             }
         );
