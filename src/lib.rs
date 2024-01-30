@@ -40,7 +40,7 @@ mod tests {
     use crate::domain::typed_predicate::TypedPredicate;
     use crate::domain::typedef::TypeDef;
     use crate::domain::{self};
-    use crate::plan::{Action, Plan};
+    use crate::plan::{action::Action, plan::Plan, plan::PlanItem};
     use crate::problem::{Object, Problem};
 
     #[test]
@@ -67,18 +67,18 @@ mod tests {
         assert_eq!(
             Plan::parse(plan_example.into()).expect("Failed to parse plan"),
             Plan(vec![
-                Action {
+                PlanItem::Simple(Action {
                     name: "pick-up".into(),
                     parameters: vec!["arm".into(), "cupcake".into(), "table".into()]
-                },
-                Action {
+                }),
+                PlanItem::Simple(Action {
                     name: "move".into(),
                     parameters: vec!["arm".into(), "table".into(), "plate".into()]
-                },
-                Action {
+                }),
+                PlanItem::Simple(Action {
                     name: "drop".into(),
                     parameters: vec!["arm".into(), "cupcake".into(), "plate".into()]
-                },
+                }),
             ])
         );
     }
