@@ -21,6 +21,20 @@ impl From<DurativeAction> for Action {
 }
 
 impl Action {
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Simple(action) => &action.name,
+            Self::Durative(action) => &action.name,
+        }
+    }
+
+    pub fn parameters(&self) -> &[crate::domain::typed_parameter::TypedParameter] {
+        match self {
+            Self::Simple(action) => &action.parameters,
+            Self::Durative(action) => &action.parameters,
+        }
+    }
+
     pub fn to_pddl(&self) -> String {
         match self {
             Self::Simple(action) => action.to_pddl(),
