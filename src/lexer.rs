@@ -11,6 +11,18 @@ use crate::error::ParserError;
 #[logos(skip r"[ \t\n\f\r]+")]
 #[logos(error = ParserError)]
 pub enum Token {
+    /// A colon `:`
+    #[token(":")]
+    Colon,
+
+    /// An open bracket `[`
+    #[token("[")]
+    OpenBracket,
+
+    /// A close bracket `]`
+    #[token("]")]
+    CloseBracket,
+
     /// An open parenthesis `(`
     #[regex(r"\([ \t\n\f]*")]
     OpenParen,
@@ -302,8 +314,9 @@ pub enum Token {
 }
 
 /// A stream of tokens. This is a wrapper around a [`logos::Lexer`]. It implements [`Clone`], so it can be cloned and used to peek ahead. It also implements [`Iterator`], so it can be used to iterate over the tokens.
+#[derive(Debug)]
 pub struct TokenStream<'a> {
-    lexer: logos::Lexer<'a, Token>,
+    pub lexer: logos::Lexer<'a, Token>,
 }
 
 impl Clone for TokenStream<'_> {
