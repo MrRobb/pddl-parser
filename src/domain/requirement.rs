@@ -146,6 +146,13 @@ impl Requirement {
         ))(input)
     }
 
+    const fn is_supported(&self) -> bool {
+        matches!(
+            self,
+            Requirement::Strips | Requirement::Typing | Requirement::DurativeActions
+        )
+    }
+
     /// Parse the requirements from a token stream.
     pub fn parse_requirements(input: TokenStream) -> IResult<TokenStream, Vec<Requirement>, ParserError> {
         log::debug!("BEGIN > parse_requirements {:?}", input.span());
@@ -157,9 +164,10 @@ impl Requirement {
 
         if let Some(requirements) = &requirements {
             for requirement in requirements {
-                match requirement {
-                    Requirement::Strips | Requirement::Typing => (),
-                    e => return Err(nom::Err::Error(ParserError::UnsupportedRequirement(e.clone()))),
+                if !requirement.is_supported() {
+                    return Err(nom::Err::Error(ParserError::UnsupportedRequirement(
+                        requirement.clone(),
+                    )));
                 }
             }
         }
