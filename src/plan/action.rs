@@ -9,3 +9,19 @@ pub enum Action {
     Simple(SimpleAction),
     Durative(DurativeAction),
 }
+
+impl Action {
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Simple(action) => &action.name,
+            Self::Durative(action) => &action.name,
+        }
+    }
+
+    pub fn parameters(&self) -> &[crate::domain::parameter::Parameter] {
+        match self {
+            Self::Simple(action) => &action.parameters,
+            Self::Durative(action) => &action.parameters,
+        }
+    }
+}
