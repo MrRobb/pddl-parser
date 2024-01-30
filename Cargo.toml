@@ -10,7 +10,7 @@ documentation = "https://docs.rs/pddl-parser"
 readme = "README.md"
 keywords = ["pddl", "parser", "planning", "language", "token"]
 categories = ["parser-implementations"]
-license = "MIT/Apache-2.0"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 nom = "7.1"
@@ -21,15 +21,14 @@ logos = "0.13.0"
 derive_more = "0.99"
 
 [dev-dependencies]
-criterion = "0.5.0"
-clap = { version = "4.3.10", features = ["derive"] }
+criterion = "0.5.1"
+clap = { version = "4.4.2", features = ["derive"] }
 
 # Testing
-git2 = { version = "0.17.2", features = ["vendored-openssl"] }
+git2 = { version = "0.18.0", features = ["vendored-openssl"] }
 url = "2.4"
 indicatif = "0.17"
-tempfile = "3.6.0"
-cached = "0.44.0"
+tempfile = "3.8.0"
 pretty_env_logger = "0.5.0"
 
 [profile.release]
