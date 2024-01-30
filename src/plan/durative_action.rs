@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::domain::parameter::Parameter;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
@@ -45,5 +47,20 @@ impl DurativeAction {
             delimited(Token::OpenBracket, tokens::float, Token::CloseBracket),
         ))(input)?;
         Ok((output, Self::new(name, parameters, duration, timestamp)))
+    }
+}
+
+impl Display for DurativeAction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "({} {})",
+            self.name,
+            self.parameters
+                .iter()
+                .map(ToString::to_string)
+                .collect::<Vec<_>>()
+                .join(" ")
+        )
     }
 }

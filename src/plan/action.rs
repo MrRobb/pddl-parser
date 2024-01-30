@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 use super::durative_action::DurativeAction;
@@ -22,6 +24,15 @@ impl Action {
         match self {
             Self::Simple(action) => &action.parameters,
             Self::Durative(action) => &action.parameters,
+        }
+    }
+}
+
+impl Display for Action {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Action::Simple(action) => write!(f, "{action}"),
+            Action::Durative(action) => write!(f, "{action}"),
         }
     }
 }
