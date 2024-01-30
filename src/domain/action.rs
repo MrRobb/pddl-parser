@@ -1,4 +1,6 @@
-use super::{durative_action::DurativeAction, simple_action::SimpleAction};
+use crate::domain::typed_parameter::TypedParameter;
+
+use super::{durative_action::DurativeAction, expression::Expression, simple_action::SimpleAction};
 use serde::{Deserialize, Serialize};
 
 /// Enum to represent either an `Action` or a `DurativeAction`.
@@ -28,10 +30,24 @@ impl Action {
         }
     }
 
-    pub fn parameters(&self) -> &[crate::domain::typed_parameter::TypedParameter] {
+    pub fn parameters(&self) -> &[TypedParameter] {
         match self {
             Self::Simple(action) => &action.parameters,
             Self::Durative(action) => &action.parameters,
+        }
+    }
+
+    pub fn precondition(&self) -> Option<Expression> {
+        match self {
+            Self::Simple(action) => action.precondition.clone(),
+            Self::Durative(action) => action.condition.clone(),
+        }
+    }
+
+    pub fn effect(&self) -> Expression {
+        match self {
+            Self::Simple(action) => action.effect.clone(),
+            Self::Durative(action) => action.effect.clone(),
         }
     }
 
