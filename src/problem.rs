@@ -5,8 +5,6 @@ use nom::IResult;
 use serde::{Deserialize, Serialize};
 
 use crate::domain::expression::Expression;
-use crate::domain::parameter::Parameter;
-use crate::domain::predicate::Predicate;
 use crate::domain::typing::Type;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};

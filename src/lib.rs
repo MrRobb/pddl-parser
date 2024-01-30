@@ -34,13 +34,12 @@ pub mod tokens;
 mod tests {
     use crate::domain::domain::Domain;
     use crate::domain::expression::Expression;
-    use crate::domain::predicate::Predicate;
     use crate::domain::requirement::Requirement;
     use crate::domain::typed_parameter::TypedParameter;
     use crate::domain::typed_predicate::TypedPredicate;
     use crate::domain::typedef::TypeDef;
     use crate::domain::{self};
-    use crate::plan::{action::Action, plan::Plan, plan::PlanItem};
+    use crate::plan::{action::Action, plan::Plan, simple_action::SimpleAction};
     use crate::problem::{Object, Problem};
 
     #[test]
@@ -67,15 +66,15 @@ mod tests {
         assert_eq!(
             Plan::parse(plan_example.into()).expect("Failed to parse plan"),
             Plan(vec![
-                PlanItem::Simple(Action {
+                Action::Simple(SimpleAction {
                     name: "pick-up".into(),
                     parameters: vec!["arm".into(), "cupcake".into(), "table".into()]
                 }),
-                PlanItem::Simple(Action {
+                Action::Simple(SimpleAction {
                     name: "move".into(),
                     parameters: vec!["arm".into(), "table".into(), "plate".into()]
                 }),
-                PlanItem::Simple(Action {
+                Action::Simple(SimpleAction {
                     name: "drop".into(),
                     parameters: vec!["arm".into(), "cupcake".into(), "plate".into()]
                 }),
