@@ -156,7 +156,7 @@ impl Requirement {
         ))(input)?;
 
         if let Some(requirements) = &requirements {
-            for requirement in requirements.iter() {
+            for requirement in requirements {
                 match requirement {
                     Requirement::Strips | Requirement::Typing => (),
                     e => return Err(nom::Err::Error(ParserError::UnsupportedRequirement(e.clone()))),
