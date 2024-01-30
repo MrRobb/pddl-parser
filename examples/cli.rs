@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use clap::Parser;
 use pddl_parser::domain::domain::Domain;
-use pddl_parser::plan::Plan;
+use pddl_parser::plan::plan::Plan;
 use pddl_parser::problem::Problem;
 
 #[derive(Parser, Debug)]
