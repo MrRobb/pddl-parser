@@ -316,7 +316,7 @@ pub enum Token {
 /// A stream of tokens. This is a wrapper around a [`logos::Lexer`]. It implements [`Clone`], so it can be cloned and used to peek ahead. It also implements [`Iterator`], so it can be used to iterate over the tokens.
 #[derive(Debug)]
 pub struct TokenStream<'a> {
-    pub lexer: logos::Lexer<'a, Token>,
+    lexer: logos::Lexer<'a, Token>,
 }
 
 impl Clone for TokenStream<'_> {
