@@ -43,7 +43,7 @@ pub struct Problem {
     pub objects: Vec<Object>,
     /// The initial state of the problem
     #[serde(default)]
-    pub init: Vec<Predicate>,
+    pub init: Vec<Expression>,
     /// The goal of the problem
     pub goal: Expression,
 }
@@ -117,24 +117,13 @@ impl Problem {
         Ok((output, objects))
     }
 
-    fn parse_init(input: TokenStream) -> IResult<TokenStream, Vec<Predicate>, ParserError> {
+    fn parse_init(input: TokenStream) -> IResult<TokenStream, Vec<Expression>, ParserError> {
         log::debug!("BEGIN > parse_init {:?}", input.span());
         let (output, init) = delimited(
             Token::OpenParen,
-            preceded(
-                Token::Init,
-                many0(delimited(
-                    Token::OpenParen,
-                    pair(id, Parameter::parse_parameters),
-                    Token::CloseParen,
-                )),
-            ),
+            preceded(Token::Init, many0(Expression::parse_expression)),
             Token::CloseParen,
         )(input)?;
-        let init = init
-            .into_iter()
-            .map(|(name, parameters)| Predicate { name, parameters })
-            .collect();
         log::debug!("END < parse_init {:?}", output.span());
         Ok((output, init))
     }
@@ -165,7 +154,7 @@ impl Problem {
         // Init
         pddl.push_str(&format!(
             "(:init\n{}\n)\n",
-            self.init.iter().map(Predicate::to_pddl).collect::<Vec<_>>().join("\n")
+            self.init.iter().map(Expression::to_pddl).collect::<Vec<_>>().join("\n")
         ));
 
         // Goal

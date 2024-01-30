@@ -110,22 +110,22 @@ mod tests {
                     },
                 ],
                 init: vec![
-                    Predicate {
+                    Expression::Atom {
                         name: "on".into(),
-                        parameters: vec!["arm".into(), "table".into(),],
+                        parameters: vec!["arm".into(), "table".into(),]
                     },
-                    Predicate {
+                    Expression::Atom {
                         name: "on".into(),
-                        parameters: vec!["cupcake".into(), "table".into(),],
+                        parameters: vec!["cupcake".into(), "table".into(),]
                     },
-                    Predicate {
+                    Expression::Atom {
                         name: "arm-empty".into(),
-                        parameters: vec![],
+                        parameters: vec![]
                     },
-                    Predicate {
+                    Expression::Atom {
                         name: "path".into(),
-                        parameters: vec!["table".into(), "plate".into(),],
-                    }
+                        parameters: vec!["table".into(), "plate".into(),]
+                    },
                 ],
                 goal: Expression::Atom {
                     name: "on".into(),
