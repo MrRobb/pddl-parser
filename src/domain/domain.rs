@@ -1,6 +1,6 @@
-use nom::combinator::opt;
 use nom::sequence::{delimited, preceded, tuple};
 use nom::IResult;
+use nom::{combinator::opt, multi::many0};
 use serde::{Deserialize, Serialize};
 
 use super::action::Action;
@@ -67,14 +67,7 @@ impl Domain {
             opt(Constant::parse_constants),
             TypedPredicate::parse_predicates,
             TypedPredicate::parse_functions,
-            alt((
-                map(DurativeAction::parse_actions, |actions| {
-                    actions.into_iter().map(Action::from).collect()
-                }),
-                map(SimpleAction::parse_actions, |actions| {
-                    actions.into_iter().map(Action::from).collect()
-                }),
-            )),
+            many0(Action::parse),
         ))(input)?;
         let domain = Domain {
             name,

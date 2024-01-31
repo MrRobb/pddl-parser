@@ -1,6 +1,9 @@
 use std::fmt::Display;
 
+use nom::{branch::alt, combinator::map, IResult};
 use serde::{Deserialize, Serialize};
+
+use crate::{error::ParserError, lexer::TokenStream};
 
 use super::durative_action::DurativeAction;
 use super::simple_action::SimpleAction;
@@ -25,6 +28,16 @@ impl Action {
             Self::Simple(action) => &action.parameters,
             Self::Durative(action) => &action.parameters,
         }
+    }
+
+    pub fn parse(input: TokenStream) -> IResult<TokenStream, Action, ParserError> {
+        log::debug!("BEGIN > parse_actions {:?}", input.span());
+        let (output, actions) = alt((
+            map(SimpleAction::parse, Action::Simple),
+            map(DurativeAction::parse, Action::Durative),
+        ))(input)?;
+        log::debug!("END < parse_actions {:?}", output.span());
+        Ok((output, actions))
     }
 }
 

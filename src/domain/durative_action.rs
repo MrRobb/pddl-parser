@@ -28,10 +28,10 @@ pub struct DurativeAction {
 
 impl DurativeAction {
     /// Parse a list of actions from a token stream.
-    pub fn parse_actions(input: TokenStream) -> IResult<TokenStream, Vec<DurativeAction>, ParserError> {
-        log::debug!("BEGIN > parse_durative_actions {:?}", input.span());
-        log::debug!("Parsing actions: {:?}", input.peek_n(10));
-        let (output, actions) = many0(map(
+    pub fn parse(input: TokenStream) -> IResult<TokenStream, DurativeAction, ParserError> {
+        log::debug!("BEGIN > parse_durative_action {:?}", input.span());
+        log::debug!("Parsing action: {:?}", input.peek_n(10));
+        let (output, action) = map(
             delimited(
                 Token::OpenParen,
                 preceded(
@@ -60,9 +60,9 @@ impl DurativeAction {
                 condition,
                 effect,
             },
-        ))(input)?;
-        log::debug!("END < parse_actions {:?}", output.span());
-        Ok((output, actions))
+        )(input)?;
+        log::debug!("END < parse_action {:?}", output.span());
+        Ok((output, action))
     }
 
     /// Convert the action to PDDL.

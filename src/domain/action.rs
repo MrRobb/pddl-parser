@@ -1,6 +1,7 @@
-use crate::domain::typed_parameter::TypedParameter;
+use crate::{domain::typed_parameter::TypedParameter, error::ParserError, lexer::TokenStream};
 
 use super::{durative_action::DurativeAction, expression::Expression, simple_action::SimpleAction};
+use nom::{branch::alt, combinator::map, IResult};
 use serde::{Deserialize, Serialize};
 
 /// Enum to represent either an `Action` or a `DurativeAction`.
@@ -49,6 +50,13 @@ impl Action {
             Self::Simple(action) => action.effect.clone(),
             Self::Durative(action) => action.effect.clone(),
         }
+    }
+
+    pub fn parse(input: TokenStream) -> IResult<TokenStream, Action, ParserError> {
+        alt((
+            map(SimpleAction::parse, Self::Simple),
+            map(DurativeAction::parse, Self::Durative),
+        ))(input)
     }
 
     pub fn to_pddl(&self) -> String {
