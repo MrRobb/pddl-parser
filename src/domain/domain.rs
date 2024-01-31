@@ -1,5 +1,4 @@
-use nom::branch::alt;
-use nom::combinator::{map, opt};
+use nom::combinator::opt;
 use nom::multi::many0;
 use nom::sequence::{delimited, preceded, tuple};
 use nom::IResult;
@@ -11,8 +10,6 @@ use super::requirement::Requirement;
 use super::typed_predicate::TypedPredicate;
 use super::typedef::TypeDef;
 use super::typing::Type;
-use crate::domain::durative_action::DurativeAction;
-use crate::domain::simple_action::SimpleAction;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;

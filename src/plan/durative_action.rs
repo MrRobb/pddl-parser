@@ -25,6 +25,15 @@ pub struct DurativeAction {
 }
 
 impl DurativeAction {
+    /// Create a new durative action. This is the same as the simple action, but with a duration and a timestamp.
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the action.
+    /// * `parameters` - The parameters of the action.
+    /// * `duration` - The duration of the action. This is the time it takes for the action to complete.
+    /// * `timestamp` - The timestamp of the action. This is the time at which the action starts.
+    ///
     pub const fn new(name: String, parameters: Vec<Parameter>, duration: f64, timestamp: f64) -> Self {
         Self {
             name,
@@ -34,6 +43,7 @@ impl DurativeAction {
         }
     }
 
+    /// Parse a durative action from a token stream.
     pub fn parse(input: TokenStream) -> IResult<TokenStream, Self, ParserError> {
         let (output, (timestamp, (name, parameters), duration)) = tuple((
             terminated(tokens::float, Token::Colon),

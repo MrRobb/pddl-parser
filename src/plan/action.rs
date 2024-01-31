@@ -13,11 +13,14 @@ use crate::lexer::TokenStream;
 /// Enum to represent either an `Action` or a `DurativeAction`.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, PartialOrd)]
 pub enum Action {
+    /// An Action wrapper around a simple action. See [`SimpleAction`](../simple_action/struct.SimpleAction.html).
     Simple(SimpleAction),
+    /// An Action wrapper around a durative action. See [`DurativeAction`](../durative_action/struct.DurativeAction.html).
     Durative(DurativeAction),
 }
 
 impl Action {
+    /// Get the name of the action. This is the same as the name of the simple or durative action.
     pub fn name(&self) -> &str {
         match self {
             Self::Simple(action) => &action.name,
@@ -25,6 +28,7 @@ impl Action {
         }
     }
 
+    /// Get the parameters of the action. This is the same as the parameters of the simple or durative action.
     pub fn parameters(&self) -> &[crate::domain::parameter::Parameter] {
         match self {
             Self::Simple(action) => &action.parameters,
@@ -32,6 +36,7 @@ impl Action {
         }
     }
 
+    /// Get the precondition of the action. This is the same as the precondition of the simple or durative action.
     pub fn parse(input: TokenStream) -> IResult<TokenStream, Action, ParserError> {
         log::debug!("BEGIN > parse_actions {:?}", input.span());
         let (output, actions) = alt((

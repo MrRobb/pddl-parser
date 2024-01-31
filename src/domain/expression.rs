@@ -26,10 +26,14 @@ pub enum BinaryOp {
     Equal,
 }
 
+/// An enumeration of duration instants that can be used in expressions. The duration instant can be one of `at start`, `at end`, or `over all`.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum DurationInstant {
+    /// The duration instant `at start` represents the start of the action.
     Start,
+    /// The duration instant `at end` represents the end of the action.
     End,
+    /// The duration instant `over all` represents the entire duration of the action.
     All,
 }
 
@@ -70,6 +74,7 @@ pub enum Expression {
     Forall(Vec<TypedParameter>, Box<Expression>),
 
     // Duration
+    /// A duration expression that takes a duration instant and a sub-expression as arguments. The duration instant can be one of `at start`, `at end`, or `over all`.
     Duration(DurationInstant, Box<Expression>),
 }
 
