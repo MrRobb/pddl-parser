@@ -24,10 +24,10 @@ impl Plan {
     ///
     /// The parser will fail if there are any tokens left after the plan. It will also fail if the plan is empty or if any of the actions are invalid.
     pub fn parse(input: TokenStream) -> Result<Self, ParserError> {
-        let (output, items) = alt((
-            many0(map(DurativeAction::parse, Action::Durative)),
-            many0(map(SimpleAction::parse, Action::Simple)),
-        ))(input)?;
+        let (output, items) = many0(alt((
+            map(DurativeAction::parse, Action::Durative),
+            map(SimpleAction::parse, Action::Simple),
+        )))(input)?;
         if !output.is_empty() {
             log::error!("Plan parser failed: {:?}", output.to_string());
             return Err(ParserError::ExpectedEndOfInput);
