@@ -6,12 +6,14 @@ pub struct TypeDef {
     /// The name of the type.
     pub name: String,
     /// The parent type. If not specified, the parent type is `object`.
-    pub parent: String,
+    pub parent: Option<String>,
 }
 
 impl TypeDef {
     /// Convert the type definition to PDDL.
     pub fn to_pddl(&self) -> String {
-        format!("{} - {}", self.name, self.parent)
+        self.parent
+            .as_ref()
+            .map_or_else(|| self.name.clone(), |parent| format!("{} - {}", self.name, parent))
     }
 }

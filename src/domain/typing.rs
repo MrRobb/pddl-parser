@@ -61,7 +61,7 @@ impl Type {
             .flat_map(|(names, parent)| {
                 names.into_iter().map(move |name| TypeDef {
                     name,
-                    parent: parent.clone().unwrap_or_else(|| "object".to_string()),
+                    parent: parent.clone(),
                 })
             })
             .collect();

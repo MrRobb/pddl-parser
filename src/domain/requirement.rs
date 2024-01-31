@@ -149,7 +149,7 @@ impl Requirement {
     const fn is_supported(&self) -> bool {
         matches!(
             self,
-            Requirement::Strips | Requirement::Typing | Requirement::DurativeActions
+            Requirement::Strips | Requirement::Typing | Requirement::DurativeActions | Requirement::NumericFluents
         )
     }
 
