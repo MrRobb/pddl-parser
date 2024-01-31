@@ -32,18 +32,19 @@ pub mod tokens;
 
 #[cfg(test)]
 mod tests {
+    use crate::domain::domain::Domain;
+    use crate::domain::durative_action::DurativeAction;
+    use crate::domain::expression::{BinaryOp, DurationInstant, Expression};
     use crate::domain::requirement::Requirement;
     use crate::domain::typed_parameter::TypedParameter;
     use crate::domain::typed_predicate::TypedPredicate;
     use crate::domain::typedef::TypeDef;
     use crate::domain::{self};
-    use crate::domain::{domain::Domain, durative_action::DurativeAction, expression::BinaryOp};
-    use crate::plan::{action::Action, plan::Plan, simple_action::SimpleAction};
+    use crate::plan;
+    use crate::plan::action::Action;
+    use crate::plan::plan::Plan;
+    use crate::plan::simple_action::SimpleAction;
     use crate::problem::{Object, Problem};
-    use crate::{
-        domain::expression::{DurationInstant, Expression},
-        plan,
-    };
 
     #[test]
     fn test_domain_to_pddl() {

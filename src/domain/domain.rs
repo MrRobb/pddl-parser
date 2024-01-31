@@ -1,6 +1,8 @@
+use nom::branch::alt;
+use nom::combinator::{map, opt};
+use nom::multi::many0;
 use nom::sequence::{delimited, preceded, tuple};
 use nom::IResult;
-use nom::{combinator::opt, multi::many0};
 use serde::{Deserialize, Serialize};
 
 use super::action::Action;
@@ -9,14 +11,11 @@ use super::requirement::Requirement;
 use super::typed_predicate::TypedPredicate;
 use super::typedef::TypeDef;
 use super::typing::Type;
+use crate::domain::durative_action::DurativeAction;
+use crate::domain::simple_action::SimpleAction;
+use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens::id;
-use crate::{
-    domain::{durative_action::DurativeAction, simple_action::SimpleAction},
-    error::ParserError,
-};
-use nom::branch::alt;
-use nom::combinator::map;
 
 /// A PDDL domain.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]

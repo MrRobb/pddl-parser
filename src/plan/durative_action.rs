@@ -1,16 +1,14 @@
 use std::fmt::Display;
 
+use nom::sequence::{delimited, pair, terminated, tuple};
+use nom::IResult;
+use serde::{Deserialize, Serialize};
+
 use crate::domain::parameter::Parameter;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
 use crate::tokens;
 use crate::tokens::id;
-use nom::sequence::delimited;
-use nom::sequence::pair;
-use nom::sequence::terminated;
-use nom::sequence::tuple;
-use nom::IResult;
-use serde::{Deserialize, Serialize};
 
 /// A durative action is an action that has a duration.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, PartialOrd)]

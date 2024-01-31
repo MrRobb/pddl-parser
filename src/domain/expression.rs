@@ -6,10 +6,10 @@ use nom::IResult;
 use serde::{Deserialize, Serialize};
 
 use super::parameter::Parameter;
+use crate::domain::typed_parameter::TypedParameter;
 use crate::error::ParserError;
 use crate::lexer::{Token, TokenStream};
-use crate::tokens::{id, integer};
-use crate::{domain::typed_parameter::TypedParameter, tokens::var};
+use crate::tokens::{id, integer, var};
 
 /// An enumeration of binary operations that can be used in expressions.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]

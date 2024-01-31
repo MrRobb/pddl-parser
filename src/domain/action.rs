@@ -1,8 +1,14 @@
-use crate::{domain::typed_parameter::TypedParameter, error::ParserError, lexer::TokenStream};
-
-use super::{durative_action::DurativeAction, expression::Expression, simple_action::SimpleAction};
-use nom::{branch::alt, combinator::map, IResult};
+use nom::branch::alt;
+use nom::combinator::map;
+use nom::IResult;
 use serde::{Deserialize, Serialize};
+
+use super::durative_action::DurativeAction;
+use super::expression::Expression;
+use super::simple_action::SimpleAction;
+use crate::domain::typed_parameter::TypedParameter;
+use crate::error::ParserError;
+use crate::lexer::TokenStream;
 
 /// Enum to represent either an `Action` or a `DurativeAction`.
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]

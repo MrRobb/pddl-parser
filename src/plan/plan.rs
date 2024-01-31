@@ -2,7 +2,6 @@ use nom::multi::many0;
 use serde::{Deserialize, Serialize};
 
 use super::action::Action;
-
 use crate::error::ParserError;
 use crate::lexer::TokenStream;
 
