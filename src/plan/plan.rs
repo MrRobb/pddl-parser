@@ -22,7 +22,7 @@ impl Plan {
     pub fn parse(input: TokenStream) -> Result<Self, ParserError> {
         let (output, items) = many0(Action::parse)(input)?;
         if !output.is_empty() {
-            log::error!("Plan parser failed: {:?}", output.to_string());
+            log::error!("Plan parser failed: {:?}", output.peek_n(10));
             return Err(ParserError::ExpectedEndOfInput);
         }
         Ok(Plan(items))

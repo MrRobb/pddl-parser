@@ -29,14 +29,10 @@ impl SimpleAction {
     pub fn parse(input: TokenStream) -> IResult<TokenStream, Self, ParserError> {
         let (output, (name, parameters)) = delimited(
             Token::OpenParen,
-            pair(Self::parse_name, Parameter::parse_parameters),
+            pair(id, Parameter::parse_parameters),
             Token::CloseParen,
         )(input)?;
         Ok((output, Self::new(name, parameters)))
-    }
-
-    fn parse_name(input: TokenStream) -> IResult<TokenStream, String, ParserError> {
-        id(input)
     }
 }
 

@@ -376,9 +376,14 @@ impl<'a> TokenStream<'a> {
         self.lexer.source().len() - self.lexer.span().end
     }
 
+    /// Returns the number of remaining tokens in the stream.
+    pub fn count(&self) -> usize {
+        self.lexer.clone().spanned().count()
+    }
+
     /// Returns `true` if the token stream is empty.
     pub fn is_empty(&self) -> bool {
-        self.len() == 0
+        self.count() == 0
     }
 
     /// Returns the next token in the stream, or `None` if the stream is empty.
@@ -394,7 +399,7 @@ impl<'a> TokenStream<'a> {
         for _ in 0..n {
             match iter.next() {
                 Some((t, span)) => tokens.push((t, self.lexer.source()[span].to_string())),
-                None => return None,
+                None => return if tokens.is_empty() { None } else { Some(tokens) },
             }
         }
         Some(tokens)
