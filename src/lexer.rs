@@ -392,7 +392,7 @@ impl<'a> TokenStream<'a> {
         iter.next().map(|(t, span)| (t, &self.lexer.source()[span]))
     }
 
-    /// Returns the next `n` tokens in the stream, or `None` if the stream is empty.
+    /// Returns the next `n` tokens in the stream. If there are fewer than `n` tokens left, returns the remaining tokens. If the stream is empty, returns `None`.
     pub fn peek_n(&self, n: usize) -> Option<Vec<(Result<Token, ParserError>, String)>> {
         let mut iter = self.lexer.clone().spanned();
         let mut tokens = Vec::new();
