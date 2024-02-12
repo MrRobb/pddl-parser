@@ -33,7 +33,6 @@ impl DurativeAction {
     /// * `parameters` - The parameters of the action.
     /// * `duration` - The duration of the action. This is the time it takes for the action to complete.
     /// * `timestamp` - The timestamp of the action. This is the time at which the action starts.
-    ///
     pub const fn new(name: String, parameters: Vec<Parameter>, duration: f64, timestamp: f64) -> Self {
         Self {
             name,
