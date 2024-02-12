@@ -69,7 +69,7 @@ impl DurativeAction {
         let mut pddl = String::new();
 
         // Action name
-        pddl.push_str(&format!("(:action {}\n", self.name));
+        pddl.push_str(&format!("(:durative-action {}\n", self.name));
 
         // Parameters
         pddl.push_str(&format!(
@@ -80,6 +80,9 @@ impl DurativeAction {
                 .collect::<Vec<_>>()
                 .join(" ")
         ));
+
+        // Duration
+        pddl.push_str(&format!(":duration {}\n", self.duration.to_pddl()));
 
         // Condition
         if let Some(condition) = &self.condition {
